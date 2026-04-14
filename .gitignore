@@ -1,0 +1,22 @@
+# Java / Spring Boot
+backend/target/
+backend/.mvn/
+backend/*.jar
+backend/*.war
+*.class
+
+# Node / React
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Env
+.env
+*.log
