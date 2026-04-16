@@ -20,3 +20,6 @@ frontend/.env
 # Env
 .env
 *.log
+
+# Config locale backend
+backend/src/main/resources/application-local.properties
