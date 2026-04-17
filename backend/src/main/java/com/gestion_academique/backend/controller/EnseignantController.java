@@ -2,6 +2,7 @@ package com.gestion_academique.backend.controller;
 
 import com.gestion_academique.backend.dto.EnseignantRequestDTO;
 import com.gestion_academique.backend.dto.EnseignantResponseDTO;
+import com.gestion_academique.backend.dto.ModuleResponseDTO;
 import com.gestion_academique.backend.service.EnseignantService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -53,5 +54,20 @@ public class EnseignantController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         enseignantService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/modules")
+    public ResponseEntity<List<ModuleResponseDTO>> getModules(@PathVariable Long id) {
+        return ResponseEntity.ok(enseignantService.getModules(id));
+    }
+
+    @PostMapping("/{id}/modules/{moduleId}")
+    public ResponseEntity<EnseignantResponseDTO> affecterModule(@PathVariable Long id, @PathVariable Long moduleId) {
+        return ResponseEntity.ok(enseignantService.affecterModule(id, moduleId));
+    }
+
+    @DeleteMapping("/{id}/modules/{moduleId}")
+    public ResponseEntity<EnseignantResponseDTO> retirerModule(@PathVariable Long id, @PathVariable Long moduleId) {
+        return ResponseEntity.ok(enseignantService.retirerModule(id, moduleId));
     }
 }

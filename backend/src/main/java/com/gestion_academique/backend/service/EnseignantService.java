@@ -2,10 +2,13 @@ package com.gestion_academique.backend.service;
 
 import com.gestion_academique.backend.dto.EnseignantRequestDTO;
 import com.gestion_academique.backend.dto.EnseignantResponseDTO;
+import com.gestion_academique.backend.dto.ModuleResponseDTO;
 import com.gestion_academique.backend.entity.Enseignant;
+import com.gestion_academique.backend.entity.Module;
 import com.gestion_academique.backend.entity.Role;
 import com.gestion_academique.backend.exception.ResourceNotFoundException;
 import com.gestion_academique.backend.repository.EnseignantRepository;
+import com.gestion_academique.backend.repository.ModuleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +23,7 @@ import java.util.stream.Collectors;
 public class EnseignantService {
 
     private final EnseignantRepository enseignantRepository;
+    private final ModuleRepository moduleRepository;
     private final EntityManager entityManager;
 
     public List<EnseignantResponseDTO> getAll() {
@@ -88,6 +92,36 @@ public class EnseignantService {
         return toResponseDTO(saved);
     }
 
+    public List<ModuleResponseDTO> getModules(Long enseignantId) {
+        Enseignant enseignant = enseignantRepository.findById(enseignantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Enseignant non trouvé avec l'id: " + enseignantId));
+        return enseignant.getModules().stream()
+                .map(this::toModuleDTO)
+                .collect(Collectors.toList());
+    }
+
+    public EnseignantResponseDTO affecterModule(Long enseignantId, Long moduleId) {
+        Enseignant enseignant = enseignantRepository.findById(enseignantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Enseignant non trouvé avec l'id: " + enseignantId));
+        Module module = moduleRepository.findById(moduleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Module non trouvé avec l'id: " + moduleId));
+
+        enseignant.getModules().add(module);
+        Enseignant saved = enseignantRepository.save(enseignant);
+        return toResponseDTO(saved);
+    }
+
+    public EnseignantResponseDTO retirerModule(Long enseignantId, Long moduleId) {
+        Enseignant enseignant = enseignantRepository.findById(enseignantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Enseignant non trouvé avec l'id: " + enseignantId));
+        Module module = moduleRepository.findById(moduleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Module non trouvé avec l'id: " + moduleId));
+
+        enseignant.getModules().remove(module);
+        Enseignant saved = enseignantRepository.save(enseignant);
+        return toResponseDTO(saved);
+    }
+
     public void delete(Long id) {
         if (!enseignantRepository.existsById(id)) {
             throw new ResourceNotFoundException("Enseignant non trouvé avec l'id: " + id);
@@ -110,6 +144,14 @@ public class EnseignantService {
             dto.setRoleNom(enseignant.getRole().getNom());
         }
 
+        return dto;
+    }
+
+    private ModuleResponseDTO toModuleDTO(Module module) {
+        ModuleResponseDTO dto = new ModuleResponseDTO();
+        dto.setCodeModule(module.getCodeModule());
+        dto.setNom(module.getNom());
+        dto.setDescription(module.getDescription());
         return dto;
     }
 }
