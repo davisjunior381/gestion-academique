@@ -23,3 +23,10 @@ frontend/.env
 
 # Config locale backend
 backend/src/main/resources/application-local.properties
+
+# Fichiers uploadés
+uploads/
+
+# Fichiers uploades
+uploads/
+backend/uploads/
