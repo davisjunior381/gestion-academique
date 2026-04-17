@@ -1,6 +1,6 @@
 # Base de données — `gestion_academique`
 
-Base PostgreSQL 15 du projet. Deux méthodes de démarrage : **Docker** (recommandée) ou **PostgreSQL local**.
+Base PostgreSQL 15 du projet. Le schéma est généré automatiquement par Hibernate (`ddl-auto=update`) à partir des entités JPA.
 
 ## Configuration
 
@@ -9,10 +9,10 @@ Base PostgreSQL 15 du projet. Deux méthodes de démarrage : **Docker** (recomma
 | Host | `localhost` |
 | Port | `5432` |
 | Database | `gestion_academique` |
-| User | `admin` |
-| Password | `password` |
+| User | `postgres` |
+| Password | `postgres` |
 
-> ⚠️ Credentials de **dev uniquement**. À remplacer par des variables d'environnement en prod.
+Ces valeurs correspondent aux defaults de `application.properties`. Surchargeables via variables d'environnement `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`.
 
 ---
 
@@ -21,11 +21,11 @@ Base PostgreSQL 15 du projet. Deux méthodes de démarrage : **Docker** (recomma
 **Prérequis** : Docker Desktop installé.
 
 ```bash
-# À la racine du repo
+# A la racine du repo
 docker compose up -d
 ```
 
-Le conteneur `sygle-postgres` démarre, crée la BD `gestion_academique` et exécute automatiquement tous les scripts du dossier `database/migrations/` (ordre alphabétique).
+Le conteneur `sygle-postgres` démarre et crée la BD `gestion_academique`. Les tables sont ensuite créées automatiquement par Hibernate au lancement du backend.
 
 **Vérifier** :
 ```bash
@@ -51,53 +51,30 @@ docker compose up -d
 **Prérequis** : PostgreSQL 15+ installé et démarré.
 
 ```bash
-# 1. Créer la BD et l'utilisateur (une seule fois)
-psql -U postgres -c "CREATE USER admin WITH PASSWORD 'password';"
-psql -U postgres -c "CREATE DATABASE gestion_academique OWNER admin;"
-
-# 2. Appliquer les migrations dans l'ordre
-psql -U admin -d gestion_academique -f database/migrations/001_init_schema.sql
+# Créer la BD (une seule fois)
+psql -U postgres -c "CREATE DATABASE gestion_academique;"
 ```
+
+Les tables sont créées automatiquement par Hibernate au démarrage du backend (`ddl-auto=update`).
 
 **Reset local** :
 ```bash
 psql -U postgres -c "DROP DATABASE IF EXISTS gestion_academique;"
-psql -U postgres -c "CREATE DATABASE gestion_academique OWNER admin;"
-psql -U admin -d gestion_academique -f database/migrations/001_init_schema.sql
+psql -U postgres -c "CREATE DATABASE gestion_academique;"
 ```
 
 ---
 
-## Schéma — vue d'ensemble
+## Schéma
 
-**13 tables** (héritage JOINED pour les utilisateurs) :
+Le schéma est géré par JPA/Hibernate. Voir les entités dans `backend/src/main/java/com/gestion_academique/backend/entity/`.
 
-- **Utilisateurs** : `utilisateur` (base) → `administrateur`, `enseignant`, `apprenant`
-- **Structure académique** : `filiere`, `promotion`, `module`, `enseignant_module`, `suivi_academique`
-- **Stages** : `entreprise`, `stage`, `rapport`
-- **Soutenances** : `soutenance`, `jury`, `jury_enseignant`
+**14 entités** (héritage JOINED pour les utilisateurs) :
 
-**4 enums** : `role_type`, `statut_stage`, `statut_rapport`, `role_jury`
+- **Utilisateurs** : `Utilisateur` (base) -> `Administrateur`, `Enseignant`, `Apprenant`
+- **Structure académique** : `Filiere`, `Promotion`, `Module`, `SuiviAcademique`
+- **Stages** : `Entreprise`, `Stage`, `RapportStage`
+- **Soutenances** : `Soutenance`, `Jury`
+- **Autres** : `Role`
 
-Voir `migrations/001_init_schema.sql` pour le détail des contraintes, FK et index.
-
----
-
-## Ajouter une migration
-
-Convention : numérotation incrémentale, description courte en snake_case.
-
-```
-database/migrations/
-├── 001_init_schema.sql       ← créé ici (T-003)
-├── 002_seed_data.sql         ← à venir si besoin
-└── 003_add_xxx.sql           ← évolutions futures
-```
-
-Les fichiers sont exécutés dans l'ordre alphabétique au premier démarrage Docker. Pour appliquer une migration après coup, la passer manuellement à `psql` (option 2 ci-dessus).
-
----
-
-## Côté Spring Boot (T-002)
-
-La config `backend/src/main/resources/application.yml` devra pointer sur cette BD avec `ddl-auto: validate` (pour que JPA vérifie que les entités correspondent au schéma SQL sans le modifier).
+**2 enums** : `StatutStage`, `StatutRapport`
