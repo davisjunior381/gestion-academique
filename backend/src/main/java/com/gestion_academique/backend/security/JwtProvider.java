@@ -2,17 +2,14 @@ package com.gestion_academique.backend.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-import io.jsonwebtoken.io.Decoders;
-import jakarta.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -34,12 +31,7 @@ public class JwtProvider {
         this.signingKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
-    public String generateAccessToken(Authentication authentication, String role) {
-        UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-        return generateToken(userPrincipal.getEmail(), role, jwtExpirationMs);
-    }
-
-    public String generateAccessTokenFromEmail(String email, String role) {
+    public String generateAccessToken(String email, String role) {
         return generateToken(email, role, jwtExpirationMs);
     }
 
@@ -48,24 +40,21 @@ public class JwtProvider {
     }
 
     private String generateToken(String email, String role, long expirationTime) {
-        SecretKey key = signingKey;
         return Jwts.builder()
                 .subject(email)
                 .claim("role", role)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))
-                .signWith(key)
+                .signWith(signingKey)
                 .compact();
     }
 
     public String getEmailFromJwt(String token) {
-        SecretKey key = signingKey;
         Claims claims = Jwts.parser()
-                .verifyWith(key)
+                .verifyWith(signingKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-
         return claims.getSubject();
     }
 
@@ -96,6 +85,4 @@ public class JwtProvider {
         }
         return false;
     }
-
 }
-
