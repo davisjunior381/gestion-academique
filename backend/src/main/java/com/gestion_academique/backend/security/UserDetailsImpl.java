@@ -1,6 +1,7 @@
 package com.gestion_academique.backend.security;
 
 import com.gestion_academique.backend.entity.Utilisateur;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,10 +17,14 @@ public class UserDetailsImpl implements UserDetails {
 
     private Long id;
     private String email;
-    private String motDePasse;
-    private String role;
-    private Collection<? extends GrantedAuthority> authorities;
 
+    @Getter(AccessLevel.NONE)
+    private String motDePasse;
+
+    private String role;
+
+    @Getter(AccessLevel.NONE)
+    private Collection<? extends GrantedAuthority> authorities;
 
     public static UserDetailsImpl build(Utilisateur utilisateur) {
         String roleName = utilisateur.getRole() != null
