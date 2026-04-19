@@ -1,15 +1,17 @@
-package com.gestion_academique.backend.dto;
+package com.gestion_academique.backend.security.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
+@Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class RegisterRequestDTO {
 
     @NotBlank(message = "Nom est requis")

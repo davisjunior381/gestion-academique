@@ -1,14 +1,12 @@
-package com.gestion_academique.backend.dto;
+package com.gestion_academique.backend.security.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class LoginRequestDTO {
 
     @Email
