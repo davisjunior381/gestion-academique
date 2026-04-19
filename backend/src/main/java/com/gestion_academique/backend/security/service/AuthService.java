@@ -48,20 +48,12 @@ public class AuthService {
             throw new IllegalArgumentException("Rôle introuvable: " + request.getRoleNom());
         }
 
-        Utilisateur user;
-        switch (role.getNom()) {
-            case "ADMIN":
-                user = new Administrateur();
-                break;
-            case "APPRENANT":
-                user = new Apprenant();
-                break;
-            case "ENSEIGNANT":
-                user = new Enseignant();
-                break;
-            default:
-                throw new IllegalArgumentException("Rôle invalide: " + role.getNom());
-        }
+        Utilisateur user = switch (role.getNom()) {
+            case "ADMIN" -> new Administrateur();
+            case "APPRENANT" -> new Apprenant();
+            case "ENSEIGNANT" -> new Enseignant();
+            default -> throw new IllegalArgumentException("Rôle invalide: " + role.getNom());
+        };
 
         user.setNom(request.getNom());
         user.setPrenom(request.getPrenom());
