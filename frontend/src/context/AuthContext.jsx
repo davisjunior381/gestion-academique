@@ -16,13 +16,20 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  const login = async (email, password) => {
-    const response = await api.post('/auth/login', { email, password });
-    const { token, user } = response.data;
+  const login = async (email, motDePasse) => {
+    const response = await api.post('/auth/login', { email, motDePasse });
+    const data = response.data;
+    const token = data.token;
+    const userData = {
+      nom: data.nom,
+      prenom: data.prenom,
+      email: data.email,
+      role: data.role,
+    };
     localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
-    setUser(user);
-    return user;
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
+    return userData;
   };
 
   const logout = () => {
