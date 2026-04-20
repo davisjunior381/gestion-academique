@@ -5,6 +5,10 @@ import Layout from './components/layout/Layout';
 import Login from './pages/auth/Login';
 import AdminDashboard from './pages/admin/Dashboard';
 import EnseignantDashboard from './pages/enseignant/Dashboard';
+import StagesEncadres from './pages/enseignant/StagesEncadres';
+import RapportsEnseignant from './pages/enseignant/Rapports';
+import ModulesEnseignant from './pages/enseignant/Modules';
+import SoutenancesEnseignant from './pages/enseignant/Soutenances';
 import ApprenantDashboard from './pages/apprenant/Dashboard';
 import Unauthorized from './pages/Unauthorized';
 
@@ -16,7 +20,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
 
-          {/* Routes Admin avec Layout */}
+          {/* Routes Admin */}
           <Route path="/admin" element={
             <ProtectedRoute roles={['ADMIN']}>
               <Layout />
@@ -25,16 +29,20 @@ export default function App() {
             <Route index element={<AdminDashboard />} />
           </Route>
 
-          {/* Routes Enseignant avec Layout */}
+          {/* Routes Enseignant */}
           <Route path="/enseignant" element={
             <ProtectedRoute roles={['ENSEIGNANT']}>
               <Layout />
             </ProtectedRoute>
           }>
             <Route index element={<EnseignantDashboard />} />
+            <Route path="stages" element={<StagesEncadres />} />
+            <Route path="rapports" element={<RapportsEnseignant />} />
+            <Route path="modules" element={<ModulesEnseignant />} />
+            <Route path="soutenances" element={<SoutenancesEnseignant />} />
           </Route>
 
-          {/* Routes Apprenant avec Layout */}
+          {/* Routes Apprenant */}
           <Route path="/apprenant" element={
             <ProtectedRoute roles={['APPRENANT']}>
               <Layout />
