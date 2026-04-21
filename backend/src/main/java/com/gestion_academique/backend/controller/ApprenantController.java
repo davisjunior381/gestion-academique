@@ -3,6 +3,7 @@ package com.gestion_academique.backend.controller;
 import com.gestion_academique.backend.dto.ApprenantRequestDTO;
 import com.gestion_academique.backend.dto.ApprenantResponseDTO;
 import com.gestion_academique.backend.service.ApprenantService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -54,4 +55,33 @@ public class ApprenantController {
         apprenantService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    // PUT /api/apprenants/{id}/filiere/{filiereId}
+    @PutMapping("/{id}/filiere/{filiereId}")
+    @Operation(summary = "Affecter un apprenant à une filière")
+    public ResponseEntity<ApprenantResponseDTO> affecterFiliere(
+            @PathVariable Long id,
+            @PathVariable Long filiereId) {
+        return ResponseEntity.ok(apprenantService.affecterFiliere(id, filiereId));
+    }
+
+    // DELETE /api/apprenants/{id}/filiere
+    @DeleteMapping("/{id}/filiere")
+    @Operation(summary = "Désaffecter un apprenant de sa filière")
+    public ResponseEntity<ApprenantResponseDTO> desaffecterFiliere(@PathVariable Long id) {
+        return ResponseEntity.ok(apprenantService.desaffecterFiliere(id));
+    }
+
+    // PUT /api/apprenants/{id}/promotion/{promotionId}
+    @PutMapping("/{id}/promotion/{promotionId}")
+    @Operation(summary = "Affecter un apprenant à une promotion")
+    public ResponseEntity<ApprenantResponseDTO> affecterPromotion(
+            @PathVariable Long id,
+            @PathVariable Long promotionId) {
+        return ResponseEntity.ok(apprenantService.affecterPromotion(id, promotionId));
+    }
+
+
+
+
 }

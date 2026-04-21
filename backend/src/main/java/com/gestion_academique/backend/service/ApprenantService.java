@@ -24,6 +24,8 @@ public class ApprenantService {
 
     private final ApprenantRepository apprenantRepository;
     private final EntityManager entityManager;
+    private final FiliereService filiereService;
+    private final PromotionService promotionService;
 
     public List<ApprenantResponseDTO> getAll() {
         return apprenantRepository.findAll().stream()
@@ -144,5 +146,31 @@ public class ApprenantService {
         }
 
         return dto;
+    }
+
+    // ---- Affectation filière ----
+    public ApprenantResponseDTO affecterFiliere(Long apprenantId, Long filiereId) {
+        Apprenant apprenant = apprenantRepository.findById(apprenantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Apprenant non trouvé avec l'id : " + apprenantId));
+        Filiere filiere = filiereService.findOrThrow(filiereId);
+        apprenant.setFiliere(filiere);
+        return toResponseDTO(apprenantRepository.save(apprenant));
+    }
+
+    // ---- Désaffectation filière ----
+    public ApprenantResponseDTO desaffecterFiliere(Long apprenantId) {
+        Apprenant apprenant = apprenantRepository.findById(apprenantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Apprenant non trouvé avec l'id : " + apprenantId));
+        apprenant.setFiliere(null);
+        return toResponseDTO(apprenantRepository.save(apprenant));
+    }
+
+    // ---- Affectation promotion ----
+    public ApprenantResponseDTO affecterPromotion(Long apprenantId, Long promotionId) {
+        Apprenant apprenant = apprenantRepository.findById(apprenantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Apprenant non trouvé avec l'id : " + apprenantId));
+        Promotion promotion = promotionService.findOrThrow(promotionId);
+        apprenant.setPromotion(promotion);
+        return toResponseDTO(apprenantRepository.save(apprenant));
     }
 }
