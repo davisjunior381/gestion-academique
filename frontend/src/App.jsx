@@ -9,6 +9,7 @@ import AdminSoutenances from './pages/admin/Soutenances';
 import AdminRapports from './pages/admin/Rapports';
 import AdminApprenants from './pages/admin/Apprenants';
 import AdminStages from './pages/admin/Stages';
+import AdminEntreprises from './pages/admin/Entreprises';
 import EnseignantDashboard from './pages/enseignant/Dashboard';
 import StagesEncadres from './pages/enseignant/StagesEncadres';
 import RapportsEnseignant from './pages/enseignant/Rapports';
@@ -41,6 +42,7 @@ export default function App() {
             <Route path="stages" element={<AdminStages />} />
             <Route path="soutenances" element={<AdminSoutenances />} />
             <Route path="rapports" element={<AdminRapports />} />
+            <Route path="entreprises" element={<AdminEntreprises />} />
           </Route>
 
           {/* Routes Enseignant */}
