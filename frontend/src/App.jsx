@@ -7,12 +7,18 @@ import AdminDashboard from './pages/admin/Dashboard';
 import AdminEnseignants from './pages/admin/Enseignants';
 import AdminSoutenances from './pages/admin/Soutenances';
 import AdminRapports from './pages/admin/Rapports';
+import AdminApprenants from './pages/admin/Apprenants';
+import AdminStages from './pages/admin/Stages';
 import EnseignantDashboard from './pages/enseignant/Dashboard';
 import StagesEncadres from './pages/enseignant/StagesEncadres';
 import RapportsEnseignant from './pages/enseignant/Rapports';
 import ModulesEnseignant from './pages/enseignant/Modules';
 import SoutenancesEnseignant from './pages/enseignant/Soutenances';
 import ApprenantDashboard from './pages/apprenant/Dashboard';
+import ApprenantStages from './pages/apprenant/Stages';
+import ApprenantRapports from './pages/apprenant/Rapports';
+import ApprenantSoutenances from './pages/apprenant/Soutenances';
+import ApprenantSuivi from './pages/apprenant/SuiviAcademique';
 import Unauthorized from './pages/Unauthorized';
 
 export default function App() {
@@ -31,6 +37,8 @@ export default function App() {
           }>
             <Route index element={<AdminDashboard />} />
             <Route path="enseignants" element={<AdminEnseignants />} />
+            <Route path="apprenants" element={<AdminApprenants />} />
+            <Route path="stages" element={<AdminStages />} />
             <Route path="soutenances" element={<AdminSoutenances />} />
             <Route path="rapports" element={<AdminRapports />} />
           </Route>
@@ -55,6 +63,10 @@ export default function App() {
             </ProtectedRoute>
           }>
             <Route index element={<ApprenantDashboard />} />
+            <Route path="stages" element={<ApprenantStages />} />
+            <Route path="rapports" element={<ApprenantRapports />} />
+            <Route path="soutenances" element={<ApprenantSoutenances />} />
+            <Route path="suivi" element={<ApprenantSuivi />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/login" />} />
