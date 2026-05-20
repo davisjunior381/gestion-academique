@@ -5,9 +5,7 @@ import com.gestion_academique.backend.entity.RapportStage;
 import com.gestion_academique.backend.entity.Stage;
 import com.gestion_academique.backend.enums.StatutRapport;
 import com.gestion_academique.backend.enums.StatutStage;
-import com.gestion_academique.backend.repository.ApprenantRepository;
 import com.gestion_academique.backend.repository.RapportStageRepository;
-import com.gestion_academique.backend.repository.StageRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
@@ -21,37 +19,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Tests d'integration des ajouts PR #31 :
  *  - filtrage /me par utilisateur connecte (stages + rapports)
  *  - depot de rapport restreint a l'apprenant proprietaire du stage
+ * persistApprenant/persistStage sont herites d'AbstractIntegrationTest.
  */
 class MeAndDepotIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
-    private ApprenantRepository apprenantRepository;
-
-    @Autowired
-    private StageRepository stageRepository;
-
-    @Autowired
     private RapportStageRepository rapportRepository;
-
-    private Apprenant persistApprenant(String email) {
-        Apprenant a = new Apprenant();
-        a.setNom("Leclerc");
-        a.setPrenom("Alice");
-        a.setEmail(email);
-        a.setMotDePasse("pwd");
-        return apprenantRepository.save(a);
-    }
-
-    private Stage persistStage(Apprenant a, StatutStage statut) {
-        Stage s = new Stage();
-        s.setTitre("Stage de " + a.getEmail());
-        s.setDateDebut(LocalDate.now().minusMonths(2));
-        s.setDateFin(LocalDate.now().plusMonths(1));
-        s.setDuree(12);
-        s.setStatut(statut);
-        s.setApprenant(a);
-        return stageRepository.save(s);
-    }
 
     private RapportStage persistRapport(Stage stage) {
         RapportStage r = new RapportStage();

@@ -2,7 +2,6 @@ package com.gestion_academique.backend.integration;
 
 import com.gestion_academique.backend.entity.Enseignant;
 import com.gestion_academique.backend.entity.Jury;
-import com.gestion_academique.backend.repository.EnseignantRepository;
 import com.gestion_academique.backend.repository.JuryRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,29 +14,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Tests d'integration Jurys (T-015) : creation et gestion des membres.
+ * persistEnseignant est herite d'AbstractIntegrationTest.
  */
 class JuryIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private JuryRepository juryRepository;
 
-    @Autowired
-    private EnseignantRepository enseignantRepository;
-
     private Jury persistJury() {
         Jury j = new Jury();
         j.setIntitule("Jury A");
         j.setRoleJury("PRESIDENT");
         return juryRepository.save(j);
-    }
-
-    private Enseignant persistEnseignant(String email) {
-        Enseignant e = new Enseignant();
-        e.setNom("Martin");
-        e.setPrenom("Sophie");
-        e.setEmail(email);
-        e.setMotDePasse("pwd");
-        return enseignantRepository.save(e);
     }
 
     @Test

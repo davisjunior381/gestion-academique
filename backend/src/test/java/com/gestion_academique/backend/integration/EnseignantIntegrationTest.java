@@ -2,10 +2,7 @@ package com.gestion_academique.backend.integration;
 
 import com.gestion_academique.backend.entity.Enseignant;
 import com.gestion_academique.backend.entity.Module;
-import com.gestion_academique.backend.repository.EnseignantRepository;
-import com.gestion_academique.backend.repository.ModuleRepository;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 import java.util.Map;
@@ -15,30 +12,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Tests d'integration Enseignants (T-010) + affectation aux modules (T-011).
+ * Les fixtures persistEnseignant/persistModule sont heritees d'AbstractIntegrationTest.
  */
 class EnseignantIntegrationTest extends AbstractIntegrationTest {
-
-    @Autowired
-    private EnseignantRepository enseignantRepository;
-
-    @Autowired
-    private ModuleRepository moduleRepository;
-
-    private Enseignant persistEnseignant(String email) {
-        Enseignant e = new Enseignant();
-        e.setNom("Martin");
-        e.setPrenom("Sophie");
-        e.setEmail(email);
-        e.setMotDePasse("pwd");
-        return enseignantRepository.save(e);
-    }
-
-    private Module persistModule(String nom) {
-        Module m = new Module();
-        m.setNom(nom);
-        m.setDescription("Module de test");
-        return moduleRepository.save(m);
-    }
 
     // --- Creation (T-010) ---
 

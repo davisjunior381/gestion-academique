@@ -2,12 +2,9 @@ package com.gestion_academique.backend.integration;
 
 import com.gestion_academique.backend.entity.Stage;
 import com.gestion_academique.backend.enums.StatutStage;
-import com.gestion_academique.backend.repository.StageRepository;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
-import java.time.LocalDate;
 import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -15,25 +12,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Tests d'integration Soutenances (T-015).
+ * persistStage est herite d'AbstractIntegrationTest (apprenant non pertinent ici, donc null).
  */
 class SoutenanceIntegrationTest extends AbstractIntegrationTest {
 
-    @Autowired
-    private StageRepository stageRepository;
-
-    private Stage persistStage() {
-        Stage s = new Stage();
-        s.setTitre("Stage soutenance");
-        s.setDateDebut(LocalDate.now().minusMonths(2));
-        s.setDateFin(LocalDate.now().plusMonths(1));
-        s.setDuree(12);
-        s.setStatut(StatutStage.EN_COURS);
-        return stageRepository.save(s);
+    private Stage stageEnCours() {
+        return persistStage(null, StatutStage.EN_COURS);
     }
 
     @Test
     void create_validPayload_returns201AndPlanifiee() throws Exception {
-        Stage stage = persistStage();
+        Stage stage = stageEnCours();
         String body = objectMapper.writeValueAsString(Map.of(
                 "date", "2026-06-01T10:00:00", "salle", "A101", "duree", 30,
                 "stageId", stage.getRefStage()));
@@ -47,7 +36,7 @@ class SoutenanceIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void create_duplicateForStage_returns400() throws Exception {
-        Stage stage = persistStage();
+        Stage stage = stageEnCours();
         String body = objectMapper.writeValueAsString(Map.of(
                 "date", "2026-06-01T10:00:00", "salle", "A101", "duree", 30,
                 "stageId", stage.getRefStage()));
@@ -62,7 +51,7 @@ class SoutenanceIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void create_missingDate_returns400() throws Exception {
-        Stage stage = persistStage();
+        Stage stage = stageEnCours();
         String body = objectMapper.writeValueAsString(Map.of(
                 "salle", "A101", "duree", 30, "stageId", stage.getRefStage()));
         mockMvc.perform(post("/api/soutenances").with(authAdmin())
@@ -96,7 +85,7 @@ class SoutenanceIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void delete_existing_returns204() throws Exception {
-        Stage stage = persistStage();
+        Stage stage = stageEnCours();
         String body = objectMapper.writeValueAsString(Map.of(
                 "date", "2026-06-01T10:00:00", "salle", "A101", "duree", 30,
                 "stageId", stage.getRefStage()));

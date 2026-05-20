@@ -2,7 +2,6 @@ package com.gestion_academique.backend.integration;
 
 import com.gestion_academique.backend.entity.Apprenant;
 import com.gestion_academique.backend.entity.SuiviAcademique;
-import com.gestion_academique.backend.repository.ApprenantRepository;
 import com.gestion_academique.backend.repository.SuiviAcademiqueRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,23 +14,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Tests d'integration Suivi academique (T-016).
+ * persistApprenant est herite d'AbstractIntegrationTest.
  */
 class SuiviAcademiqueIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
-    private ApprenantRepository apprenantRepository;
-
-    @Autowired
     private SuiviAcademiqueRepository suiviRepository;
-
-    private Apprenant persistApprenant(String email) {
-        Apprenant a = new Apprenant();
-        a.setNom("Leclerc");
-        a.setPrenom("Alice");
-        a.setEmail(email);
-        a.setMotDePasse("pwd");
-        return apprenantRepository.save(a);
-    }
 
     private SuiviAcademique persistSuivi(Apprenant a, String semestre, float moyenne) {
         SuiviAcademique s = new SuiviAcademique();
@@ -101,12 +89,14 @@ class SuiviAcademiqueIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void moyenne_returns200() throws Exception {
+    void moyenne_returnsComputedAverage() throws Exception {
         Apprenant a = persistApprenant("suivi.moy@test.fr");
         persistSuivi(a, "S1", 16f);
         persistSuivi(a, "S1", 14f);
         mockMvc.perform(get("/api/suivi-academique/apprenant/{id}/moyenne", a.getCodeUtilisateur())
                         .with(authAdmin()))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.moyenneGenerale").value(15.0))
+                .andExpect(jsonPath("$.nombreSuivis").value(2));
     }
 }
