@@ -76,7 +76,8 @@ public class RapportStageService {
         } else if ("ENSEIGNANT".equals(role)) {
             rapports = rapportRepository.findByStageEncadrantCodeUtilisateur(userId);
         } else {
-            rapports = rapportRepository.findAll();
+            // Les autres rôles (admin) passent par GET /rapports ; "mes rapports" ne les concerne pas
+            rapports = List.of();
         }
         return rapports.stream().map(this::toResponseDTO).collect(Collectors.toList());
     }

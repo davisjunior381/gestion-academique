@@ -62,7 +62,8 @@ public class StageService {
         } else if ("ENSEIGNANT".equals(role)) {
             stages = stageRepository.findByEncadrantCodeUtilisateur(userId);
         } else {
-            stages = stageRepository.findAll();
+            // Les autres rôles (admin) passent par GET /stages ; "mes stages" ne les concerne pas
+            stages = List.of();
         }
         return stages.stream().map(this::toResponseDTO).collect(Collectors.toList());
     }

@@ -12,6 +12,8 @@ function DepotModal({ onClose, onSave }) {
   const [stageId, setStageId] = useState('');
   const [fichier, setFichier] = useState(null);
   const [stages, setStages] = useState([]);
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     api.get('/stages/me').then(res => setStages(res.data)).catch(console.error);
@@ -22,7 +24,14 @@ function DepotModal({ onClose, onSave }) {
     if (!fichier || !stageId) return;
     const formData = new FormData();
     formData.append('fichier', fichier);
-    onSave(stageId, formData);
+    setSubmitting(true);
+    setError('');
+    onSave(stageId, formData)
+      .then(() => onClose())
+      .catch(() => {
+        setError('Le dépôt a échoué. Vérifiez que le fichier est bien un PDF, puis réessayez.');
+        setSubmitting(false);
+      });
   };
 
   return (
@@ -45,9 +54,11 @@ function DepotModal({ onClose, onSave }) {
             <input className="w-full border rounded-lg px-3 py-2 text-sm" type="file" accept=".pdf"
               onChange={e => setFichier(e.target.files[0])} required />
           </div>
+          {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex gap-2 pt-2">
-            <button type="submit" className="flex-1 bg-blue-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-blue-700">
-              Deposer
+            <button type="submit" disabled={submitting}
+              className="flex-1 bg-blue-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
+              {submitting ? 'Depot...' : 'Deposer'}
             </button>
             <button type="button" onClick={onClose} className="flex-1 border rounded-lg py-2 text-sm font-medium hover:bg-gray-50">
               Annuler
@@ -76,12 +87,11 @@ export default function Rapports() {
   };
 
   const handleDeposer = (stageId, formData) => {
-    api.post(`/rapports/deposer/${stageId}`, formData, {
+    return api.post(`/rapports/deposer/${stageId}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     }).then(() => {
       loadRapports();
-      setShowDepot(false);
-    }).catch(console.error);
+    });
   };
 
   if (loading) return <div className="flex items-center justify-center h-64"><p className="text-gray-400">Chargement...</p></div>;
