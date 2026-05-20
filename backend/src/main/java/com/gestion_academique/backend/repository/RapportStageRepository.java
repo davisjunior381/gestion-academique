@@ -13,4 +13,6 @@ public interface RapportStageRepository extends JpaRepository<RapportStage, Long
     Optional<RapportStage> findByStageRefStage(Long stageId);
     List<RapportStage> findByStatut(StatutRapport statut);
     List<RapportStage> findByEvaluateurCodeUtilisateur(Long evaluateurId);
+    List<RapportStage> findByStageApprenantCodeUtilisateur(Long apprenantId);
+    List<RapportStage> findByStageEncadrantCodeUtilisateur(Long encadrantId);
 }

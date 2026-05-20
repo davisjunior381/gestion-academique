@@ -55,6 +55,18 @@ public class StageService {
                 .collect(Collectors.toList());
     }
 
+    public List<StageResponseDTO> getMine(Long userId, String role) {
+        List<Stage> stages;
+        if ("APPRENANT".equals(role)) {
+            stages = stageRepository.findByApprenantCodeUtilisateur(userId);
+        } else if ("ENSEIGNANT".equals(role)) {
+            stages = stageRepository.findByEncadrantCodeUtilisateur(userId);
+        } else {
+            stages = stageRepository.findAll();
+        }
+        return stages.stream().map(this::toResponseDTO).collect(Collectors.toList());
+    }
+
     public StageResponseDTO create(StageRequestDTO dto) {
         if (dto.getDateFin().isBefore(dto.getDateDebut())) {
             throw new IllegalArgumentException("La date de fin ne peut pas être avant la date de début");

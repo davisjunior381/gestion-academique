@@ -3,11 +3,13 @@ package com.gestion_academique.backend.controller;
 import com.gestion_academique.backend.dto.StageRequestDTO;
 import com.gestion_academique.backend.dto.StageResponseDTO;
 import com.gestion_academique.backend.enums.StatutStage;
+import com.gestion_academique.backend.security.UserDetailsImpl;
 import com.gestion_academique.backend.service.StageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +25,11 @@ public class StageController {
     @GetMapping
     public ResponseEntity<List<StageResponseDTO>> getAll() {
         return ResponseEntity.ok(stageService.getAll());
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<List<StageResponseDTO>> getMine(@AuthenticationPrincipal UserDetailsImpl user) {
+        return ResponseEntity.ok(stageService.getMine(user.getId(), user.getRole()));
     }
 
     @GetMapping("/{id}")

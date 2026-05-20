@@ -3,12 +3,15 @@ package com.gestion_academique.backend.controller;
 import com.gestion_academique.backend.dto.EvaluationDTO;
 import com.gestion_academique.backend.dto.RapportResponseDTO;
 import com.gestion_academique.backend.enums.StatutRapport;
+import com.gestion_academique.backend.security.UserDetailsImpl;
 import com.gestion_academique.backend.service.RapportStageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +29,11 @@ public class RapportStageController {
     @GetMapping
     public ResponseEntity<List<RapportResponseDTO>> getAll() {
         return ResponseEntity.ok(rapportService.getAll());
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<List<RapportResponseDTO>> getMine(@AuthenticationPrincipal UserDetailsImpl user) {
+        return ResponseEntity.ok(rapportService.getMine(user.getId(), user.getRole()));
     }
 
     @GetMapping("/{id}")
@@ -48,11 +56,14 @@ public class RapportStageController {
         return ResponseEntity.ok(rapportService.getByEvaluateur(evaluateurId));
     }
 
+    @PreAuthorize("hasRole('APPRENANT')")
     @PostMapping(value = "/deposer/{stageId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<RapportResponseDTO> deposer(
             @PathVariable Long stageId,
+            @AuthenticationPrincipal UserDetailsImpl user,
             @RequestParam("fichier") MultipartFile fichier) throws IOException {
-        return ResponseEntity.status(HttpStatus.CREATED).body(rapportService.deposer(stageId, fichier));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(rapportService.deposer(stageId, user.getId(), fichier));
     }
 
     @PostMapping("/{rapportId}/evaluer")
