@@ -12,6 +12,7 @@ import com.gestion_academique.backend.repository.RapportStageRepository;
 import com.gestion_academique.backend.repository.StageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -68,9 +69,28 @@ public class RapportStageService {
                 .collect(Collectors.toList());
     }
 
-    public RapportResponseDTO deposer(Long stageId, MultipartFile fichier) throws IOException {
+    public List<RapportResponseDTO> getMine(Long userId, String role) {
+        List<RapportStage> rapports;
+        if ("APPRENANT".equals(role)) {
+            rapports = rapportRepository.findByStageApprenantCodeUtilisateur(userId);
+        } else if ("ENSEIGNANT".equals(role)) {
+            rapports = rapportRepository.findByStageEncadrantCodeUtilisateur(userId);
+        } else {
+            // Les autres rôles (admin) passent par GET /rapports ; "mes rapports" ne les concerne pas
+            rapports = List.of();
+        }
+        return rapports.stream().map(this::toResponseDTO).collect(Collectors.toList());
+    }
+
+    public RapportResponseDTO deposer(Long stageId, Long apprenantId, MultipartFile fichier) throws IOException {
         Stage stage = stageRepository.findById(stageId)
                 .orElseThrow(() -> new ResourceNotFoundException("Stage non trouvé avec l'id: " + stageId));
+
+        // Un apprenant ne peut déposer un rapport que sur son propre stage
+        if (stage.getApprenant() == null
+                || !stage.getApprenant().getCodeUtilisateur().equals(apprenantId)) {
+            throw new AccessDeniedException("Vous ne pouvez déposer un rapport que sur votre propre stage");
+        }
 
         if (stage.getStatut() != StatutStage.EN_COURS && stage.getStatut() != StatutStage.TERMINE) {
             throw new IllegalArgumentException("Le stage doit être en cours ou terminé pour déposer un rapport");
