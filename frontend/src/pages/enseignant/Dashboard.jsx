@@ -11,20 +11,21 @@ export default function EnseignantDashboard() {
 
   useEffect(() => {
     const fetchStats = async () => {
+      const id = user?.codeUtilisateur;
+      if (!id) {
+        setLoading(false);
+        return;
+      }
       try {
-        const enseignants = await api.get('/enseignants');
-        const moi = enseignants.data.find(e => e.email === user?.email);
-        if (moi) {
-          const [stages, rapports] = await Promise.all([
-            api.get(`/stages/encadrant/${moi.codeUtilisateur}`).catch(() => ({ data: [] })),
-            api.get(`/rapports/evaluateur/${moi.codeUtilisateur}`).catch(() => ({ data: [] })),
-          ]);
-          setStats({
-            stages: stages.data.length,
-            rapports: rapports.data.length,
-            rapportsAEvaluer: rapports.data.filter(r => r.statut === 'DEPOSE').length,
-          });
-        }
+        const [stages, rapports] = await Promise.all([
+          api.get(`/stages/encadrant/${id}`).catch(() => ({ data: [] })),
+          api.get(`/rapports/evaluateur/${id}`).catch(() => ({ data: [] })),
+        ]);
+        setStats({
+          stages: stages.data.length,
+          rapports: rapports.data.length,
+          rapportsAEvaluer: rapports.data.filter(r => r.statut === 'DEPOSE').length,
+        });
       } catch (e) { console.error(e); }
       setLoading(false);
     };

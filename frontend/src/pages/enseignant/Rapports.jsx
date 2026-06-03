@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 import { ui, badgeClass, statutLabel, formatDateFR } from '../../components/common/ui';
 
 export default function Rapports() {
+  const { user } = useAuth();
   const [rapports, setRapports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [evalModal, setEvalModal] = useState(null);
@@ -27,7 +29,7 @@ export default function Rapports() {
       await api.post(`/rapports/${rapportId}/evaluer`, {
         note: parseFloat(note),
         commentaire,
-        evaluateurId: 2,
+        evaluateurId: user?.codeUtilisateur,
       });
       setEvalModal(null);
       setNote('');

@@ -66,7 +66,7 @@ public class AuthService {
         String token = jwtProvider.generateAccessToken(saved.getEmail(), role.getNom());
 
         return new AuthResponseDto(token, saved.getEmail(), role.getNom(),
-                saved.getNom(), saved.getPrenom());
+                saved.getNom(), saved.getPrenom(), saved.getCodeUtilisateur());
     }
 
     public AuthResponseDto login(LoginRequestDTO request) {
@@ -88,6 +88,7 @@ public class AuthService {
         String token = jwtProvider.generateAccessToken(utilisateur.getEmail(), roleName);
 
         return new AuthResponseDto(token, utilisateur.getEmail(), roleName,
-                utilisateur.getNom(), utilisateur.getPrenom());
+                utilisateur.getNom(), utilisateur.getPrenom(),
+                utilisateur.getCodeUtilisateur());
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,6 +43,11 @@ public class SoutenanceService {
     }
 
     public SoutenanceResponseDTO create(SoutenanceRequestDTO dto) {
+        // Defense en profondeur : doublon de la contrainte @FutureOrPresent du DTO
+        if (dto.getDate() != null && dto.getDate().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("La date de soutenance doit être dans le futur");
+        }
+
         Stage stage = entityManager.find(Stage.class, dto.getStageId());
         if (stage == null) throw new ResourceNotFoundException("Stage non trouvé avec l'id: " + dto.getStageId());
 
