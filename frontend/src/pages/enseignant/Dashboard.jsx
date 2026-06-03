@@ -13,7 +13,6 @@ export default function EnseignantDashboard() {
       try {
         const enseignants = await api.get('/enseignants');
         const moi = enseignants.data.find(e => e.email === user?.email);
-
         if (moi) {
           const [stages, rapports] = await Promise.all([
             api.get(`/stages/encadrant/${moi.codeUtilisateur}`).catch(() => ({ data: [] })),
@@ -31,37 +30,29 @@ export default function EnseignantDashboard() {
     fetchStats();
   }, [user]);
 
-  if (loading) return <div className="flex h-64 items-center justify-center text-sm text-slate-400">Chargement...</div>;
+  if (loading) return <p className="text-slate-400 p-6">Chargement...</p>;
 
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-slate-900">Bienvenue, {user?.prenom}</h1>
-        <p className="mt-1 text-sm text-slate-500">Aperçu de votre activité.</p>
+        <h1 className="text-2xl font-semibold text-slate-800">Bienvenue, {user?.prenom}</h1>
+        <p className="text-sm text-slate-500 mt-1">Voici un aperçu de votre activité.</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Link to="/enseignant/stages" className="rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-300">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <Link to="/enseignant/stages" className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-sm transition">
           <p className="text-sm text-slate-500">Stages encadrés</p>
-          <p className="mt-1 text-3xl font-semibold text-slate-900">{stats.stages}</p>
+          <p className="text-3xl font-semibold text-slate-800 mt-1">{stats.stages}</p>
         </Link>
-<<<<<<< HEAD
-        <Link to="/enseignant/rapports" className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-sm transition">
-          <p className="text-sm text-gray-500">Rapports évalués</p>
-          <p className="text-3xl font-semibold text-gray-800 mt-1">{stats.rapports}</p>
-=======
-        <Link to="/enseignant/rapports" className="rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-300">
-          <p className="text-sm text-slate-500">Rapports au total</p>
-          <p className="mt-1 text-3xl font-semibold text-slate-900">{stats.rapports}</p>
->>>>>>> develop
+        <Link to="/enseignant/rapports" className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-sm transition">
+          <p className="text-sm text-slate-500">Rapports évalués</p>
+          <p className="text-3xl font-semibold text-slate-800 mt-1">{stats.rapports}</p>
         </Link>
-        <Link to="/enseignant/rapports" className="rounded-lg border border-slate-200 bg-white p-5 transition hover:border-slate-300">
+        <Link to="/enseignant/rapports" className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-sm transition">
           <p className="text-sm text-slate-500">Rapports à évaluer</p>
-          <p className="mt-1 text-3xl font-semibold text-amber-600">{stats.rapportsAEvaluer}</p>
+          <p className="text-3xl font-semibold text-amber-600 mt-1">{stats.rapportsAEvaluer}</p>
           {stats.rapportsAEvaluer > 0 && (
-            <span className="mt-2 inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-200">
-              Action requise
-            </span>
+            <span className="inline-block mt-2 px-2 py-0.5 bg-amber-50 text-amber-700 rounded-md ring-1 ring-inset ring-amber-200 text-xs font-medium">Action requise</span>
           )}
         </Link>
       </div>
