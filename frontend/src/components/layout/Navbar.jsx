@@ -1,6 +1,12 @@
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
+const ROLE_LABELS = {
+  ADMIN: 'Admin',
+  ENSEIGNANT: 'Enseignant',
+  APPRENANT: 'Élève',
+};
+
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -10,36 +16,42 @@ export default function Navbar() {
     navigate('/login');
   };
 
-  const initials = user ? `${user.prenom?.[0] || ''}${user.nom?.[0] || ''}`.toUpperCase() : '?';
+  const initials = user
+    ? `${user.prenom?.[0] || ''}${user.nom?.[0] || ''}`.toUpperCase()
+    : '?';
+  const today = new Date().toLocaleDateString('fr-FR', {
+    weekday: 'long', day: 'numeric', month: 'long',
+  });
 
   return (
-    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
-      <div>
-        <h2 className="text-sm font-medium text-gray-500">
-          Bienvenue,
-        </h2>
-        <p className="text-base font-semibold text-gray-800">
-          {user?.prenom} {user?.nom}
-        </p>
-      </div>
-
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-medium">
-            {initials}
-          </div>
-          <div className="hidden sm:block">
-            <p className="text-sm font-medium text-gray-700">{user?.prenom} {user?.nom}</p>
-            <p className="text-xs text-gray-400">{user?.email}</p>
-          </div>
+    <header className="border-b border-ink-200 bg-white">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-8 py-4">
+        <div>
+          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-400">
+            {today}
+          </p>
+          <p className="mt-0.5 font-display text-base text-ink-700">
+            {user?.prenom} {user?.nom}
+            <span className="ml-2 font-sans text-xs text-ink-400">
+              {ROLE_LABELS[user?.role] || ''}
+            </span>
+          </p>
         </div>
 
-        <button
-          onClick={handleLogout}
-          className="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-        >
-          Déconnexion
-        </button>
+        <div className="flex items-center gap-4">
+          <div className="hidden text-right sm:block">
+            <p className="text-xs text-ink-400">{user?.email}</p>
+          </div>
+          <div className="flex h-9 w-9 items-center justify-center rounded-sm bg-brand-700 font-mono text-[11px] font-medium tracking-wider text-ink-50">
+            {initials}
+          </div>
+          <button
+            onClick={handleLogout}
+            className="rounded-sm border border-ink-200 px-3 py-1.5 text-sm text-ink-600 transition hover:border-accent-300 hover:text-accent-600"
+          >
+            Se déconnecter
+          </button>
+        </div>
       </div>
     </header>
   );

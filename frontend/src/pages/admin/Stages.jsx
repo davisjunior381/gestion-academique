@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
+import { ui, badgeClass, statutLabel, formatDateFR } from '../../components/common/ui';
 
-const STATUT_COLORS = {
-  EN_COURS: 'bg-blue-50 text-blue-700',
-  TERMINE: 'bg-amber-50 text-amber-700',
-  VALIDE: 'bg-green-50 text-green-700',
-  REFUSE: 'bg-red-50 text-red-700'
-};
+const FILTERS = [
+  { value: '', label: 'Tous' },
+  { value: 'EN_COURS', label: 'En cours' },
+  { value: 'TERMINE', label: 'Terminés' },
+  { value: 'VALIDE', label: 'Validés' },
+  { value: 'REFUSE', label: 'Refusés' },
+];
 
 function StageModal({ stage, onClose, onSave }) {
   const [form, setForm] = useState({
@@ -45,44 +47,71 @@ function StageModal({ stage, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md">
-        <h2 className="text-lg font-semibold mb-4">{stage ? 'Modifier' : 'Créer'} un stage</h2>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <input className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Titre *"
-            value={form.titre} onChange={e => setForm({ ...form, titre: e.target.value })} required />
-          <div className="grid grid-cols-2 gap-2">
+    <div className={ui.modalOverlay}>
+      <div className={`${ui.modalPanel} max-w-lg`}>
+        <div className={ui.modalHeader}>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent-600">
+            {stage ? 'Édition' : 'Nouveau stage'}
+          </p>
+          <h2 className={ui.modalTitle}>
+            {stage ? stage.titre : 'Créer une convention de stage'}
+          </h2>
+        </div>
+        <form onSubmit={handleSubmit} className={ui.modalBody}>
+          <div>
+            <label className={ui.label}>Intitulé du stage</label>
+            <input className={ui.input} placeholder="Développement d'une plateforme..."
+              value={form.titre} onChange={e => setForm({ ...form, titre: e.target.value })} required />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="text-xs text-gray-500">Début *</label>
-              <input className="w-full border rounded-lg px-3 py-2 text-sm" type="date"
+              <label className={ui.label}>Début</label>
+              <input className={ui.input} type="date"
                 value={form.dateDebut} onChange={e => setForm({ ...form, dateDebut: e.target.value })} required />
             </div>
             <div>
-              <label className="text-xs text-gray-500">Fin *</label>
-              <input className="w-full border rounded-lg px-3 py-2 text-sm" type="date"
+              <label className={ui.label}>Fin</label>
+              <input className={ui.input} type="date"
                 value={form.dateFin} onChange={e => setForm({ ...form, dateFin: e.target.value })} required />
             </div>
+            <div>
+              <label className={ui.label}>Durée (sem.)</label>
+              <input className={ui.input} type="number"
+                value={form.duree} onChange={e => setForm({ ...form, duree: e.target.value })} required />
+            </div>
           </div>
-          <input className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Durée (semaines) *" type="number"
-            value={form.duree} onChange={e => setForm({ ...form, duree: e.target.value })} required />
-          <textarea className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Objectif" rows={2}
-            value={form.objectif} onChange={e => setForm({ ...form, objectif: e.target.value })} />
-          <select className="w-full border rounded-lg px-3 py-2 text-sm"
-            value={form.apprenantId} onChange={e => setForm({ ...form, apprenantId: e.target.value })}>
-            <option value="">Apprenant</option>
-            {apprenants.map(a => <option key={a.codeUtilisateur} value={a.codeUtilisateur}>{a.nom} {a.prenom}</option>)}
-          </select>
-          <select className="w-full border rounded-lg px-3 py-2 text-sm"
-            value={form.encadrantId} onChange={e => setForm({ ...form, encadrantId: e.target.value })}>
-            <option value="">Encadrant</option>
-            {enseignants.map(e => <option key={e.codeUtilisateur} value={e.codeUtilisateur}>{e.nom} {e.prenom}</option>)}
-          </select>
-          <div className="flex gap-2 pt-2">
-            <button type="submit" className="flex-1 bg-blue-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-blue-700">
-              {stage ? 'Modifier' : 'Créer'}
-            </button>
-            <button type="button" onClick={onClose} className="flex-1 border rounded-lg py-2 text-sm font-medium hover:bg-gray-50">
-              Annuler
+          <div>
+            <label className={ui.label}>Objectif du stage</label>
+            <textarea className={ui.input} rows={3}
+              placeholder="Mission de l'élève, ce qu'il doit apprendre..."
+              value={form.objectif} onChange={e => setForm({ ...form, objectif: e.target.value })} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={ui.label}>Apprenant</label>
+              <select className={ui.input}
+                value={form.apprenantId} onChange={e => setForm({ ...form, apprenantId: e.target.value })}>
+                <option value="">Non affecté</option>
+                {apprenants.map(a => (
+                  <option key={a.codeUtilisateur} value={a.codeUtilisateur}>{a.prenom} {a.nom}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={ui.label}>Tuteur école</label>
+              <select className={ui.input}
+                value={form.encadrantId} onChange={e => setForm({ ...form, encadrantId: e.target.value })}>
+                <option value="">Non affecté</option>
+                {enseignants.map(e => (
+                  <option key={e.codeUtilisateur} value={e.codeUtilisateur}>{e.prenom} {e.nom}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className={ui.modalFooter}>
+            <button type="button" onClick={onClose} className={ui.btnSecondary}>Annuler</button>
+            <button type="submit" className={ui.btnPrimary}>
+              {stage ? 'Enregistrer' : 'Créer le stage'}
             </button>
           </div>
         </form>
@@ -115,68 +144,105 @@ export default function Stages() {
   };
 
   const handleDelete = (id) => {
-    if (!window.confirm('Supprimer ce stage ?')) return;
+    if (!window.confirm('Confirmer la suppression de ce stage ?')) return;
     api.delete(`/stages/${id}`).then(() => loadStages()).catch(console.error);
   };
 
   const filtered = filter ? stages.filter(s => s.statut === filter) : stages;
 
-  if (loading) return <div className="flex items-center justify-center h-64"><p className="text-gray-400">Chargement...</p></div>;
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-400">Chargement...</p>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-800">Stages</h1>
-          <p className="text-sm text-gray-500 mt-1">{stages.length} stage(s)</p>
+      <header className={ui.pageHeader}>
+        <div className="flex items-end justify-between gap-6">
+          <div>
+            <p className={ui.kicker}>Liste des stages</p>
+            <h1 className={ui.pageTitle}>Stages</h1>
+            <p className={ui.pageLead}>
+              {stages.length} stage{stages.length > 1 ? 's' : ''} en cours ou terminé{stages.length > 1 ? 's' : ''}.
+              Triez par statut pour voir ce qu'il reste à traiter.
+            </p>
+          </div>
+          <button onClick={() => { setEditing(null); setShowModal(true); }} className={ui.btnPrimary}>
+            Créer un stage
+          </button>
         </div>
-        <button onClick={() => { setEditing(null); setShowModal(true); }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">+ Créer</button>
-      </div>
-      <div className="flex gap-2 mb-4">
-        {['', 'EN_COURS', 'TERMINE', 'VALIDE', 'REFUSE'].map(s => (
-          <button key={s} onClick={() => setFilter(s)}
-            className={`px-3 py-1 rounded-full text-xs font-medium ${filter === s ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
-            {s ? s.replace('_', ' ') : 'Tous'}
+      </header>
+
+      <div className="mb-5 flex flex-wrap items-center gap-1 border-b border-ink-200 pb-3">
+        {FILTERS.map(f => (
+          <button key={f.value} onClick={() => setFilter(f.value)}
+            className={`rounded-sm px-3 py-1 font-mono text-[11px] uppercase tracking-wider transition ${
+              filter === f.value
+                ? 'bg-ink-900 text-ink-50'
+                : 'text-ink-500 hover:bg-ink-100 hover:text-ink-900'
+            }`}>
+            {f.label}
           </button>
         ))}
+        <span className="ml-auto font-mono text-[11px] uppercase tracking-wider text-ink-400">
+          {filtered.length} résultat{filtered.length > 1 ? 's' : ''}
+        </span>
       </div>
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left text-gray-600">
+
+      <div className={ui.tableWrap}>
+        <table className={ui.table}>
+          <thead className={ui.thead}>
             <tr>
-              <th className="px-4 py-3">Titre</th>
-              <th className="px-4 py-3">Début</th>
-              <th className="px-4 py-3">Fin</th>
-              <th className="px-4 py-3">Apprenant</th>
-              <th className="px-4 py-3">Encadrant</th>
-              <th className="px-4 py-3">Statut</th>
-              <th className="px-4 py-3">Actions</th>
+              <th className={ui.th}>Intitulé</th>
+              <th className={ui.th}>Début</th>
+              <th className={ui.th}>Fin</th>
+              <th className={ui.th}>Apprenant</th>
+              <th className={ui.th}>Encadrant</th>
+              <th className={ui.th}>Statut</th>
+              <th className={`${ui.th} text-right`}>Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className={ui.tbody}>
             {filtered.map(s => (
-              <tr key={s.refStage}>
-                <td className="px-4 py-3 font-medium text-gray-800">{s.titre}</td>
-                <td className="px-4 py-3 text-gray-600">{s.dateDebut || '-'}</td>
-                <td className="px-4 py-3 text-gray-600">{s.dateFin || '-'}</td>
-                <td className="px-4 py-3 text-gray-600">{s.apprenantNom ? `${s.apprenantNom} ${s.apprenantPrenom}` : '-'}</td>
-                <td className="px-4 py-3 text-gray-600">{s.encadrantNom ? `${s.encadrantNom} ${s.encadrantPrenom}` : '-'}</td>
-                <td className="px-4 py-3">
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${STATUT_COLORS[s.statut] || 'bg-gray-100'}`}>{s.statut}</span>
+              <tr key={s.refStage} className={ui.tr}>
+                <td className={ui.tdStrong}>
+                  <span className="font-display text-base">{s.titre}</span>
+                </td>
+                <td className={`${ui.td} font-mono text-xs`}>{formatDateFR(s.dateDebut)}</td>
+                <td className={`${ui.td} font-mono text-xs`}>{formatDateFR(s.dateFin)}</td>
+                <td className={ui.td}>
+                  {s.apprenantNom ? `${s.apprenantPrenom || ''} ${s.apprenantNom}`.trim() : '-'}
+                </td>
+                <td className={ui.td}>
+                  {s.encadrantNom ? `${s.encadrantPrenom || ''} ${s.encadrantNom}`.trim() : '-'}
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex gap-2">
-                    <button onClick={() => { setEditing(s); setShowModal(true); }} className="text-blue-600 hover:text-blue-800 text-xs">Modifier</button>
-                    <button onClick={() => handleDelete(s.refStage)} className="text-red-600 hover:text-red-800 text-xs">Supprimer</button>
+                  <span className={badgeClass(s.statut)}>{statutLabel(s.statut)}</span>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex justify-end gap-3">
+                    <button onClick={() => { setEditing(s); setShowModal(true); }}
+                      className="text-sm text-ink-600 transition hover:text-brand-700">Éditer</button>
+                    <button onClick={() => handleDelete(s.refStage)}
+                      className="text-sm text-accent-600 transition hover:text-accent-700">Supprimer</button>
                   </div>
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400">Aucun stage</td></tr>}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={7} className="px-4 py-12 text-center text-sm text-ink-500">
+                  Aucun stage dans cette catégorie.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
+
       {showModal && <StageModal stage={editing} onClose={() => { setShowModal(false); setEditing(null); }} onSave={handleSave} />}
     </div>
   );
