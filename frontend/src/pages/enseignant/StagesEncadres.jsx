@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
 
-const statutColors = {
-  EN_COURS: 'bg-blue-50 text-blue-700',
-  TERMINE: 'bg-amber-50 text-amber-700',
-  VALIDE: 'bg-green-50 text-green-700',
-  REFUSE: 'bg-red-50 text-red-700',
+const STATUT_STYLES = {
+  EN_COURS: 'bg-blue-50 text-blue-700 ring-blue-200',
+  TERMINE: 'bg-amber-50 text-amber-700 ring-amber-200',
+  VALIDE: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+  REFUSE: 'bg-red-50 text-red-700 ring-red-200',
 };
 
 export default function StagesEncadres() {
@@ -19,39 +19,39 @@ export default function StagesEncadres() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p className="text-gray-400">Chargement...</p>;
+  if (loading) return <div className="flex h-64 items-center justify-center text-sm text-slate-400">Chargement...</div>;
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-800 mb-6">Stages encadrés</h1>
+      <h1 className="mb-6 text-xl font-semibold text-slate-900">Stages encadrés</h1>
 
       {stages.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-          <p className="text-gray-400">Aucun stage pour le moment.</p>
+        <div className="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+          <p className="text-sm text-slate-500">Aucun stage pour le moment.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Titre</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Apprenant</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Dates</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Statut</th>
+        <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+          <table className="w-full text-sm">
+            <thead className="border-b border-slate-200 bg-slate-50 text-left text-slate-600">
+              <tr>
+                <th className="px-4 py-3 font-medium">Titre</th>
+                <th className="px-4 py-3 font-medium">Apprenant</th>
+                <th className="px-4 py-3 font-medium">Dates</th>
+                <th className="px-4 py-3 font-medium">Statut</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               {stages.map(stage => (
-                <tr key={stage.refStage} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm font-medium text-gray-800">{stage.titre}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
+                <tr key={stage.refStage} className="hover:bg-slate-50">
+                  <td className="px-4 py-3 font-medium text-slate-900">{stage.titre}</td>
+                  <td className="px-4 py-3 text-slate-600">
                     {stage.apprenantNom ? `${stage.apprenantPrenom} ${stage.apprenantNom}` : 'Non affecté'}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">
+                  <td className="px-4 py-3 text-slate-500">
                     {stage.dateDebut} → {stage.dateFin}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${statutColors[stage.statut]}`}>
+                    <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${STATUT_STYLES[stage.statut] || 'bg-slate-100 text-slate-600 ring-slate-200'}`}>
                       {stage.statut.replace('_', ' ')}
                     </span>
                   </td>
