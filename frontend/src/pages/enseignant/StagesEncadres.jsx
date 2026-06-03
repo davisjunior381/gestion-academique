@@ -1,12 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
-
-const STATUT_STYLES = {
-  EN_COURS: 'bg-blue-50 text-blue-700 ring-blue-200',
-  TERMINE: 'bg-amber-50 text-amber-700 ring-amber-200',
-  VALIDE: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
-  REFUSE: 'bg-red-50 text-red-700 ring-red-200',
-};
+import { ui, badgeClass, statutLabel, formatDateFR } from '../../components/common/ui';
 
 export default function StagesEncadres() {
   const [stages, setStages] = useState([]);
@@ -19,41 +13,60 @@ export default function StagesEncadres() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="flex h-64 items-center justify-center text-sm text-slate-400">Chargement...</div>;
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-400">Chargement...</p>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <h1 className="mb-6 text-xl font-semibold text-slate-900">Stages encadrés</h1>
+      <header className={ui.pageHeader}>
+        <p className={ui.kicker}>Mes élèves en stage</p>
+        <h1 className={ui.pageTitle}>Stages encadrés</h1>
+        <p className={ui.pageLead}>
+          Les stages dont vous êtes le tuteur côté école.
+        </p>
+      </header>
 
       {stages.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-          <p className="text-sm text-slate-500">Aucun stage pour le moment.</p>
+        <div className="rounded-sm border border-dashed border-ink-300 bg-white px-8 py-16 text-center">
+          <p className="font-display text-xl font-medium text-ink-800">
+            Aucun stage à encadrer pour l'instant.
+          </p>
+          <p className="mx-auto mt-3 max-w-md text-sm text-ink-500">
+            Vos stages s'afficheront ici dès que l'admin vous en aura confié un.
+          </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-          <table className="w-full text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-left text-slate-600">
+        <div className={ui.tableWrap}>
+          <table className={ui.table}>
+            <thead className={ui.thead}>
               <tr>
-                <th className="px-4 py-3 font-medium">Titre</th>
-                <th className="px-4 py-3 font-medium">Apprenant</th>
-                <th className="px-4 py-3 font-medium">Dates</th>
-                <th className="px-4 py-3 font-medium">Statut</th>
+                <th className={ui.th}>Intitulé</th>
+                <th className={ui.th}>Apprenant</th>
+                <th className={ui.th}>Période</th>
+                <th className={ui.th}>Statut</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className={ui.tbody}>
               {stages.map(stage => (
-                <tr key={stage.refStage} className="hover:bg-slate-50">
-                  <td className="px-4 py-3 font-medium text-slate-900">{stage.titre}</td>
-                  <td className="px-4 py-3 text-slate-600">
-                    {stage.apprenantNom ? `${stage.apprenantPrenom} ${stage.apprenantNom}` : 'Non affecté'}
+                <tr key={stage.refStage} className={ui.tr}>
+                  <td className={ui.tdStrong}>
+                    <span className="font-display text-base">{stage.titre}</span>
                   </td>
-                  <td className="px-4 py-3 text-slate-500">
-                    {stage.dateDebut} → {stage.dateFin}
+                  <td className={ui.td}>
+                    {stage.apprenantNom
+                      ? `${stage.apprenantPrenom || ''} ${stage.apprenantNom}`.trim()
+                      : <span className="italic text-ink-400">Non affecté</span>}
+                  </td>
+                  <td className={`${ui.td} font-mono text-xs`}>
+                    {formatDateFR(stage.dateDebut)} <span className="text-ink-300">-</span> {formatDateFR(stage.dateFin)}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${STATUT_STYLES[stage.statut] || 'bg-slate-100 text-slate-600 ring-slate-200'}`}>
-                      {stage.statut.replace('_', ' ')}
-                    </span>
+                    <span className={badgeClass(stage.statut)}>{statutLabel(stage.statut)}</span>
                   </td>
                 </tr>
               ))}

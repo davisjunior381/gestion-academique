@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
+import { ui } from '../../components/common/ui';
 
 function ApprenantModal({ apprenant, onClose, onSave }) {
   const [form, setForm] = useState({
@@ -37,38 +38,72 @@ function ApprenantModal({ apprenant, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md">
-        <h2 className="text-lg font-semibold mb-4">{apprenant ? 'Modifier' : 'Créer'} un apprenant</h2>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <input className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Nom *"
-            value={form.nom} onChange={e => setForm({ ...form, nom: e.target.value })} required />
-          <input className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Prénom *"
-            value={form.prenom} onChange={e => setForm({ ...form, prenom: e.target.value })} required />
-          <input className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Email *" type="email"
-            value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
+    <div className={ui.modalOverlay}>
+      <div className={ui.modalPanel}>
+        <div className={ui.modalHeader}>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent-600">
+            {apprenant ? 'Édition' : 'Nouvel apprenant'}
+          </p>
+          <h2 className={ui.modalTitle}>
+            {apprenant ? `${apprenant.prenom} ${apprenant.nom}` : 'Ajouter un apprenant'}
+          </h2>
+        </div>
+        <form onSubmit={handleSubmit} className={ui.modalBody}>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={ui.label}>Nom</label>
+              <input className={ui.input} value={form.nom}
+                onChange={e => setForm({ ...form, nom: e.target.value })} required />
+            </div>
+            <div>
+              <label className={ui.label}>Prénom</label>
+              <input className={ui.input} value={form.prenom}
+                onChange={e => setForm({ ...form, prenom: e.target.value })} required />
+            </div>
+          </div>
+          <div>
+            <label className={ui.label}>Email</label>
+            <input className={ui.input} type="email" value={form.email}
+              onChange={e => setForm({ ...form, email: e.target.value })} required />
+          </div>
           {!apprenant && (
-            <input className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Mot de passe *" type="password"
-              value={form.motDePasse} onChange={e => setForm({ ...form, motDePasse: e.target.value })} required />
+            <div>
+              <label className={ui.label}>Mot de passe initial</label>
+              <input className={ui.input} type="password" value={form.motDePasse}
+                onChange={e => setForm({ ...form, motDePasse: e.target.value })} required />
+            </div>
           )}
-          <input className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="N° étudiant"
-            value={form.numEtudiant} onChange={e => setForm({ ...form, numEtudiant: e.target.value })} />
-          <select className="w-full border rounded-lg px-3 py-2 text-sm"
-            value={form.filiereId} onChange={e => setForm({ ...form, filiereId: e.target.value })}>
-            <option value="">Filière</option>
-            {filieres.map(f => <option key={f.codeFiliere || f.id} value={f.codeFiliere || f.id}>{f.nom}</option>)}
-          </select>
-          <select className="w-full border rounded-lg px-3 py-2 text-sm"
-            value={form.promotionId} onChange={e => setForm({ ...form, promotionId: e.target.value })}>
-            <option value="">Promotion</option>
-            {promotions.map(p => <option key={p.codePromotion || p.id} value={p.codePromotion || p.id}>{p.nom}</option>)}
-          </select>
-          <div className="flex gap-2 pt-2">
-            <button type="submit" className="flex-1 bg-blue-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-blue-700">
-              {apprenant ? 'Modifier' : 'Créer'}
-            </button>
-            <button type="button" onClick={onClose} className="flex-1 border rounded-lg py-2 text-sm font-medium hover:bg-gray-50">
-              Annuler
+          <div>
+            <label className={ui.label}>Numéro étudiant</label>
+            <input className={ui.input} value={form.numEtudiant}
+              onChange={e => setForm({ ...form, numEtudiant: e.target.value })} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={ui.label}>Filière</label>
+              <select className={ui.input}
+                value={form.filiereId} onChange={e => setForm({ ...form, filiereId: e.target.value })}>
+                <option value="">Non affectée</option>
+                {filieres.map(f => (
+                  <option key={f.codeFiliere || f.id} value={f.codeFiliere || f.id}>{f.nom}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={ui.label}>Promotion</label>
+              <select className={ui.input}
+                value={form.promotionId} onChange={e => setForm({ ...form, promotionId: e.target.value })}>
+                <option value="">Non affectée</option>
+                {promotions.map(p => (
+                  <option key={p.codePromotion || p.id} value={p.codePromotion || p.id}>{p.nom}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className={ui.modalFooter}>
+            <button type="button" onClick={onClose} className={ui.btnSecondary}>Annuler</button>
+            <button type="submit" className={ui.btnPrimary}>
+              {apprenant ? 'Enregistrer' : 'Créer l\'apprenant'}
             </button>
           </div>
         </form>
@@ -101,7 +136,7 @@ export default function Apprenants() {
   };
 
   const handleDelete = (id) => {
-    if (!window.confirm('Supprimer cet apprenant ?')) return;
+    if (!window.confirm('Confirmer la suppression de cet apprenant ?')) return;
     api.delete(`/apprenants/${id}`).then(() => loadApprenants()).catch(console.error);
   };
 
@@ -109,53 +144,84 @@ export default function Apprenants() {
     `${a.nom} ${a.prenom} ${a.email} ${a.numEtudiant || ''}`.toLowerCase().includes(search.toLowerCase())
   );
 
-  if (loading) return <div className="flex items-center justify-center h-64"><p className="text-gray-400">Chargement...</p></div>;
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-400">Chargement...</p>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-800">Apprenants</h1>
-          <p className="text-sm text-gray-500 mt-1">{apprenants.length} apprenant(s)</p>
+      <header className={ui.pageHeader}>
+        <div className="flex items-end justify-between gap-6">
+          <div>
+            <p className={ui.kicker}>Liste des élèves</p>
+            <h1 className={ui.pageTitle}>Apprenants</h1>
+            <p className={ui.pageLead}>
+              {apprenants.length} élève{apprenants.length > 1 ? 's' : ''} sur la plateforme.
+            </p>
+          </div>
+          <button onClick={() => { setEditing(null); setShowModal(true); }} className={ui.btnPrimary}>
+            Ajouter un apprenant
+          </button>
         </div>
-        <button onClick={() => { setEditing(null); setShowModal(true); }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">+ Créer</button>
+      </header>
+
+      <div className="mb-4 max-w-md">
+        <input className={ui.input} placeholder="Rechercher par nom, email, n° étudiant..."
+          value={search} onChange={e => setSearch(e.target.value)} />
       </div>
-      <input className="w-full border rounded-lg px-3 py-2 text-sm mb-4" placeholder="Rechercher..."
-        value={search} onChange={e => setSearch(e.target.value)} />
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left text-gray-600">
+
+      <div className={ui.tableWrap}>
+        <table className={ui.table}>
+          <thead className={ui.thead}>
             <tr>
-              <th className="px-4 py-3">Nom</th>
-              <th className="px-4 py-3">Email</th>
-              <th className="px-4 py-3">N° étudiant</th>
-              <th className="px-4 py-3">Filière</th>
-              <th className="px-4 py-3">Promotion</th>
-              <th className="px-4 py-3">Actions</th>
+              <th className={ui.th}>Identité</th>
+              <th className={ui.th}>Email</th>
+              <th className={ui.th}>N° étudiant</th>
+              <th className={ui.th}>Filière</th>
+              <th className={ui.th}>Promotion</th>
+              <th className={`${ui.th} text-right`}>Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className={ui.tbody}>
             {filtered.map(a => (
-              <tr key={a.codeUtilisateur}>
-                <td className="px-4 py-3 font-medium text-gray-800">{a.nom} {a.prenom}</td>
-                <td className="px-4 py-3 text-gray-600">{a.email}</td>
-                <td className="px-4 py-3 text-gray-600">{a.numEtudiant || '-'}</td>
-                <td className="px-4 py-3 text-gray-600">{a.filiereNom || '-'}</td>
-                <td className="px-4 py-3 text-gray-600">{a.promotionNom || '-'}</td>
+              <tr key={a.codeUtilisateur} className={ui.tr}>
+                <td className={ui.tdStrong}>
+                  <span className="font-display text-base">{a.prenom} {a.nom}</span>
+                </td>
+                <td className={ui.td}>{a.email}</td>
+                <td className={`${ui.td} font-mono text-xs`}>{a.numEtudiant || '-'}</td>
+                <td className={ui.td}>{a.filiereNom || '-'}</td>
+                <td className={ui.td}>{a.promotionNom || '-'}</td>
                 <td className="px-4 py-3">
-                  <div className="flex gap-2">
-                    <button onClick={() => { setEditing(a); setShowModal(true); }} className="text-blue-600 hover:text-blue-800 text-xs">Modifier</button>
-                    <button onClick={() => handleDelete(a.codeUtilisateur)} className="text-red-600 hover:text-red-800 text-xs">Supprimer</button>
+                  <div className="flex justify-end gap-3">
+                    <button onClick={() => { setEditing(a); setShowModal(true); }}
+                      className="text-sm text-ink-600 transition hover:text-brand-700">Éditer</button>
+                    <button onClick={() => handleDelete(a.codeUtilisateur)}
+                      className="text-sm text-accent-600 transition hover:text-accent-700">Supprimer</button>
                   </div>
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">Aucun apprenant</td></tr>}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={6} className="px-4 py-12 text-center">
+                  <p className="text-sm text-ink-500">Aucun apprenant ne correspond à votre recherche.</p>
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
-      {showModal && <ApprenantModal apprenant={editing} onClose={() => { setShowModal(false); setEditing(null); }} onSave={handleSave} />}
+
+      {showModal && (
+        <ApprenantModal apprenant={editing}
+          onClose={() => { setShowModal(false); setEditing(null); }}
+          onSave={handleSave} />
+      )}
     </div>
   );
 }

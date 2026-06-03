@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
+import { ui, badgeClass, statutLabel, formatDateFR } from '../../components/common/ui';
 
-const STATUT_COLORS = {
-  DEPOSE: 'bg-gray-100 text-gray-700',
-  EVALUE: 'bg-amber-50 text-amber-700',
-  VALIDE: 'bg-green-50 text-green-700',
-  REJETE: 'bg-red-50 text-red-700'
-};
+const FILTERS = [
+  { value: '', label: 'Tous' },
+  { value: 'DEPOSE', label: 'Déposés' },
+  { value: 'EVALUE', label: 'Évalués' },
+  { value: 'VALIDE', label: 'Validés' },
+  { value: 'REJETE', label: 'Rejetés' },
+];
 
 function EvaluationModal({ rapport, onClose, onSave }) {
   const [form, setForm] = useState({ note: '', commentaire: '', evaluateurId: '' });
@@ -26,36 +28,44 @@ function EvaluationModal({ rapport, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md">
-        <h2 className="text-lg font-semibold mb-4">Evaluer le rapport</h2>
-        <p className="text-sm text-gray-500 mb-4">Stage : {rapport.stageTitre}</p>
-        <form onSubmit={handleSubmit} className="space-y-3">
+    <div className={ui.modalOverlay}>
+      <div className={ui.modalPanel}>
+        <div className={ui.modalHeader}>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent-600">
+            Notation
+          </p>
+          <h2 className={ui.modalTitle}>{rapport.stageTitre || 'Rapport de stage'}</h2>
+        </div>
+        <form onSubmit={handleSubmit} className={ui.modalBody}>
           <div>
-            <label className="text-xs text-gray-500">Note /20 *</label>
-            <input className="w-full border rounded-lg px-3 py-2 text-sm" type="number"
-              min="0" max="20" step="0.5" placeholder="Note"
+            <label className={ui.label}>Note sur 20</label>
+            <input className={ui.input} type="number" min="0" max="20" step="0.5"
+              placeholder="15,5"
               value={form.note} onChange={e => setForm({ ...form, note: e.target.value })} required />
           </div>
-          <textarea className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Commentaire"
-            rows={3} value={form.commentaire} onChange={e => setForm({ ...form, commentaire: e.target.value })} />
           <div>
-            <label className="text-xs text-gray-500">Evaluateur *</label>
-            <select className="w-full border rounded-lg px-3 py-2 text-sm"
-              value={form.evaluateurId} onChange={e => setForm({ ...form, evaluateurId: e.target.value })} required>
-              <option value="">Selectionner un enseignant</option>
+            <label className={ui.label}>Commentaire</label>
+            <textarea className={ui.input} rows={4}
+              placeholder="Ce qui est bien, ce qui peut être amélioré..."
+              value={form.commentaire}
+              onChange={e => setForm({ ...form, commentaire: e.target.value })} />
+          </div>
+          <div>
+            <label className={ui.label}>Prof qui note</label>
+            <select className={ui.input} required
+              value={form.evaluateurId}
+              onChange={e => setForm({ ...form, evaluateurId: e.target.value })}>
+              <option value="">Choisir un enseignant</option>
               {enseignants.map(e => (
-                <option key={e.codeUtilisateur} value={e.codeUtilisateur}>{e.nom} {e.prenom}</option>
+                <option key={e.codeUtilisateur} value={e.codeUtilisateur}>
+                  {e.prenom} {e.nom}
+                </option>
               ))}
             </select>
           </div>
-          <div className="flex gap-2 pt-2">
-            <button type="submit" className="flex-1 bg-blue-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-blue-700">
-              Evaluer
-            </button>
-            <button type="button" onClick={onClose} className="flex-1 border rounded-lg py-2 text-sm font-medium hover:bg-gray-50">
-              Annuler
-            </button>
+          <div className={ui.modalFooter}>
+            <button type="button" onClick={onClose} className={ui.btnSecondary}>Annuler</button>
+            <button type="submit" className={ui.btnPrimary}>Enregistrer la note</button>
           </div>
         </form>
       </div>
@@ -69,9 +79,7 @@ export default function Rapports() {
   const [evaluating, setEvaluating] = useState(null);
   const [filter, setFilter] = useState('');
 
-  useEffect(() => {
-    loadRapports();
-  }, []);
+  useEffect(() => { loadRapports(); }, []);
 
   const loadRapports = () => {
     api.get('/rapports')
@@ -82,103 +90,114 @@ export default function Rapports() {
 
   const handleEvaluer = (rapportId, evaluation) => {
     api.post(`/rapports/${rapportId}/evaluer`, evaluation)
-      .then(() => {
-        loadRapports();
-        setEvaluating(null);
-      }).catch(console.error);
+      .then(() => { loadRapports(); setEvaluating(null); })
+      .catch(console.error);
   };
 
   const handleValider = (id) => {
-    api.patch(`/rapports/${id}/valider`)
-      .then(() => loadRapports())
-      .catch(console.error);
+    api.patch(`/rapports/${id}/valider`).then(() => loadRapports()).catch(console.error);
   };
 
   const handleRejeter = (id) => {
-    api.patch(`/rapports/${id}/rejeter`)
-      .then(() => loadRapports())
-      .catch(console.error);
+    api.patch(`/rapports/${id}/rejeter`).then(() => loadRapports()).catch(console.error);
   };
 
   const handleDelete = (id) => {
-    if (!window.confirm('Supprimer ce rapport ?')) return;
-    api.delete(`/rapports/${id}`)
-      .then(() => loadRapports())
-      .catch(console.error);
+    if (!window.confirm('Confirmer la suppression de ce rapport ?')) return;
+    api.delete(`/rapports/${id}`).then(() => loadRapports()).catch(console.error);
   };
 
-  const filtered = filter
-    ? rapports.filter(r => r.statut === filter)
-    : rapports;
+  const filtered = filter ? rapports.filter(r => r.statut === filter) : rapports;
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><p className="text-gray-400">Chargement...</p></div>;
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-400">Chargement...</p>
+      </div>
+    );
   }
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">Rapports de stage</h1>
-        <p className="text-sm text-gray-500 mt-1">{rapports.length} rapport(s)</p>
-      </div>
+      <header className={ui.pageHeader}>
+        <p className={ui.kicker}>Suivi des rapports</p>
+        <h1 className={ui.pageTitle}>Rapports de stage</h1>
+        <p className={ui.pageLead}>
+          {rapports.length} rapport{rapports.length > 1 ? 's' : ''} déposé{rapports.length > 1 ? 's' : ''}, en cours de
+          notation par les profs ou de validation par l'admin.
+        </p>
+      </header>
 
-      <div className="flex gap-2 mb-4">
-        {['', 'DEPOSE', 'EVALUE', 'VALIDE', 'REJETE'].map(s => (
-          <button key={s} onClick={() => setFilter(s)}
-            className={`px-3 py-1 rounded-full text-xs font-medium ${filter === s ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
-            {s || 'Tous'}
+      <div className="mb-5 flex flex-wrap items-center gap-1 border-b border-ink-200 pb-3">
+        {FILTERS.map(f => (
+          <button key={f.value} onClick={() => setFilter(f.value)}
+            className={`rounded-sm px-3 py-1 font-mono text-[11px] uppercase tracking-wider transition ${
+              filter === f.value
+                ? 'bg-ink-900 text-ink-50'
+                : 'text-ink-500 hover:bg-ink-100 hover:text-ink-900'
+            }`}>
+            {f.label}
           </button>
         ))}
+        <span className="ml-auto font-mono text-[11px] uppercase tracking-wider text-ink-400">
+          {filtered.length} résultat{filtered.length > 1 ? 's' : ''}
+        </span>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left text-gray-600">
+      <div className={ui.tableWrap}>
+        <table className={ui.table}>
+          <thead className={ui.thead}>
             <tr>
-              <th className="px-4 py-3">Stage</th>
-              <th className="px-4 py-3">Date depot</th>
-              <th className="px-4 py-3">Note</th>
-              <th className="px-4 py-3">Evaluateur</th>
-              <th className="px-4 py-3">Statut</th>
-              <th className="px-4 py-3">Actions</th>
+              <th className={ui.th}>Stage</th>
+              <th className={ui.th}>Déposé le</th>
+              <th className={ui.th}>Note</th>
+              <th className={ui.th}>Noté par</th>
+              <th className={ui.th}>Statut</th>
+              <th className={`${ui.th} text-right`}>Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className={ui.tbody}>
             {filtered.map(r => (
-              <tr key={r.refRapport}>
-                <td className="px-4 py-3 font-medium text-gray-800">{r.stageTitre || '-'}</td>
-                <td className="px-4 py-3 text-gray-600">{r.dateDepot || '-'}</td>
-                <td className="px-4 py-3 text-gray-600">{r.note != null ? `${r.note}/20` : '-'}</td>
-                <td className="px-4 py-3 text-gray-600">
-                  {r.evaluateurNom ? `${r.evaluateurNom} ${r.evaluateurPrenom}` : '-'}
+              <tr key={r.refRapport} className={ui.tr}>
+                <td className={ui.tdStrong}>{r.stageTitre || 'Sans titre'}</td>
+                <td className={`${ui.td} font-mono text-xs`}>{formatDateFR(r.dateDepot)}</td>
+                <td className={`${ui.td} font-mono`}>
+                  {r.note != null
+                    ? <span className="text-ink-900">{r.note}<span className="text-ink-400">/20</span></span>
+                    : '-'}
+                </td>
+                <td className={ui.td}>
+                  {r.evaluateurNom ? `${r.evaluateurPrenom || ''} ${r.evaluateurNom}`.trim() : '-'}
                 </td>
                 <td className="px-4 py-3">
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${STATUT_COLORS[r.statut] || 'bg-gray-100'}`}>
-                    {r.statut}
-                  </span>
+                  <span className={badgeClass(r.statut)}>{statutLabel(r.statut)}</span>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex gap-2">
+                  <div className="flex justify-end gap-3">
                     {r.statut === 'DEPOSE' && (
                       <button onClick={() => setEvaluating(r)}
-                        className="text-amber-600 hover:text-amber-800 text-xs">Evaluer</button>
+                        className="text-sm text-brand-700 transition hover:text-brand-800">Évaluer</button>
                     )}
                     {r.statut === 'EVALUE' && (
                       <>
                         <button onClick={() => handleValider(r.refRapport)}
-                          className="text-green-600 hover:text-green-800 text-xs">Valider</button>
+                          className="text-sm text-success-700 transition hover:text-success-500">Valider</button>
                         <button onClick={() => handleRejeter(r.refRapport)}
-                          className="text-red-600 hover:text-red-800 text-xs">Rejeter</button>
+                          className="text-sm text-accent-600 transition hover:text-accent-700">Rejeter</button>
                       </>
                     )}
                     <button onClick={() => handleDelete(r.refRapport)}
-                      className="text-red-600 hover:text-red-800 text-xs">Supprimer</button>
+                      className="text-sm text-ink-400 transition hover:text-accent-600">Supprimer</button>
                   </div>
                 </td>
               </tr>
             ))}
             {filtered.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">Aucun rapport</td></tr>
+              <tr>
+                <td colSpan={6} className="px-4 py-12 text-center text-sm text-ink-500">
+                  Aucun rapport dans cette catégorie.
+                </td>
+              </tr>
             )}
           </tbody>
         </table>

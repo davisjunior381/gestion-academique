@@ -2,45 +2,61 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { getStats } from '../../services/statsService';
 
-function StatCard({ label, value, color }) {
-  const colorClasses = {
-    blue: 'bg-blue-50 text-blue-700',
-    green: 'bg-green-50 text-green-700',
-    amber: 'bg-amber-50 text-amber-700',
-    red: 'bg-red-50 text-red-700',
-    purple: 'bg-purple-50 text-purple-700',
-    gray: 'bg-gray-50 text-gray-700',
-  };
-
+function MetricCell({ label, value, hint, index = 0 }) {
+  const delayClass = ['sygle-reveal-1', 'sygle-reveal-2', 'sygle-reveal-3', 'sygle-reveal-4'][index] || '';
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
-      <p className="text-sm text-gray-500 mb-1">{label}</p>
-      <p className="text-3xl font-semibold text-gray-800">{value}</p>
-      <div className={`inline-block mt-2 px-2 py-0.5 rounded text-xs font-medium ${colorClasses[color] || colorClasses.gray}`}>
+    <div className={`sygle-reveal ${delayClass} border-l border-ink-200 px-6 py-4 first:border-l-0 first:pl-0`}>
+      <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-500">
         {label}
-      </div>
+      </p>
+      <p className="mt-2 font-display text-4xl font-medium tabular-nums tracking-tight text-ink-900">
+        {value}
+      </p>
+      {hint && <p className="mt-1 text-xs text-ink-400">{hint}</p>}
     </div>
   );
 }
 
 function StageStatusBar({ enCours, termines, valides, total }) {
-  if (total === 0) return <p className="text-sm text-gray-400">Aucun stage</p>;
-  const pEnCours = Math.round((enCours / total) * 100);
-  const pTermines = Math.round((termines / total) * 100);
-  const pValides = Math.round((valides / total) * 100);
+  if (total === 0) {
+    return (
+      <p className="text-sm text-ink-400">Aucun stage suivi à ce jour.</p>
+    );
+  }
+  const pEnCours = (enCours / total) * 100;
+  const pTermines = (termines / total) * 100;
+  const pValides = (valides / total) * 100;
 
   return (
     <div>
-      <div className="flex h-3 rounded-full overflow-hidden bg-gray-100">
-        {pEnCours > 0 && <div className="bg-blue-500" style={{ width: `${pEnCours}%` }} />}
-        {pTermines > 0 && <div className="bg-amber-500" style={{ width: `${pTermines}%` }} />}
-        {pValides > 0 && <div className="bg-green-500" style={{ width: `${pValides}%` }} />}
+      <div className="flex h-1.5 overflow-hidden rounded-sm bg-ink-100">
+        {pEnCours > 0 && <div className="bg-brand-500" style={{ width: `${pEnCours}%` }} />}
+        {pTermines > 0 && <div className="bg-warning-500" style={{ width: `${pTermines}%` }} />}
+        {pValides > 0 && <div className="bg-success-500" style={{ width: `${pValides}%` }} />}
       </div>
-      <div className="flex gap-4 mt-2 text-xs text-gray-500">
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500" />En cours ({enCours})</span>
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500" />Terminés ({termines})</span>
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500" />Validés ({valides})</span>
-      </div>
+      <dl className="mt-4 grid grid-cols-3 gap-4 text-xs">
+        <div className="border-l-2 border-brand-500 pl-3">
+          <dt className="font-mono uppercase tracking-wider text-ink-500">En cours</dt>
+          <dd className="mt-1 font-display text-xl tabular-nums text-ink-900">{enCours}</dd>
+        </div>
+        <div className="border-l-2 border-warning-500 pl-3">
+          <dt className="font-mono uppercase tracking-wider text-ink-500">Terminés</dt>
+          <dd className="mt-1 font-display text-xl tabular-nums text-ink-900">{termines}</dd>
+        </div>
+        <div className="border-l-2 border-success-500 pl-3">
+          <dt className="font-mono uppercase tracking-wider text-ink-500">Validés</dt>
+          <dd className="mt-1 font-display text-xl tabular-nums text-ink-900">{valides}</dd>
+        </div>
+      </dl>
+    </div>
+  );
+}
+
+function RapportRow({ label, value, accent }) {
+  return (
+    <div className="flex items-baseline justify-between border-b border-ink-100 py-2 last:border-b-0">
+      <span className={`text-sm ${accent || 'text-ink-600'}`}>{label}</span>
+      <span className="font-mono text-sm tabular-nums text-ink-900">{value}</span>
     </div>
   );
 }
@@ -59,61 +75,75 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-gray-400">Chargement des statistiques...</p>
+      <div className="flex h-64 items-center justify-center">
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-400">
+          Chargement des indicateurs...
+        </p>
       </div>
     );
   }
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Bonjour {user?.prenom}, voici un aperçu de la plateforme.
+      <header className="mb-10 border-b border-ink-200 pb-8">
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-accent-600">
+          Tableau de bord admin
         </p>
-      </div>
+        <h1 className="mt-2 font-display text-4xl font-medium tracking-tight text-ink-900">
+          {user?.prenom}, vue d'ensemble de la plateforme.
+        </h1>
+        <p className="mt-3 max-w-2xl text-sm text-ink-500">
+          Un résumé des élèves, des stages en cours et des rapports.
+          Les chiffres se mettent à jour tout seuls.
+        </p>
+      </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard label="Apprenants" value={stats?.totalApprenants || 0} color="blue" />
-        <StatCard label="Enseignants" value={stats?.totalEnseignants || 0} color="purple" />
-        <StatCard label="Stages" value={stats?.totalStages || 0} color="amber" />
-        <StatCard label="Soutenances" value={stats?.totalSoutenances || 0} color="green" />
-      </div>
+      {/* Indicateurs cles : style "bandeau de chiffres" facon presse */}
+      <section className="mb-12 grid grid-cols-2 gap-x-2 border-y border-ink-200 py-6 md:grid-cols-4">
+        <MetricCell index={0} label="Apprenants" value={stats?.totalApprenants || 0} hint="inscrits" />
+        <MetricCell index={1} label="Enseignants" value={stats?.totalEnseignants || 0} hint="affectés" />
+        <MetricCell index={2} label="Stages" value={stats?.totalStages || 0} hint="recensés" />
+        <MetricCell index={3} label="Soutenances" value={stats?.totalSoutenances || 0} hint="planifiées" />
+      </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h2 className="text-base font-semibold text-gray-800 mb-4">Statut des stages</h2>
+      <section className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <article className="sygle-lift rounded-sm border border-ink-200 bg-white p-6">
+          <header className="mb-5 flex items-baseline justify-between border-b border-ink-100 pb-3">
+            <h2 className="font-display text-lg font-medium tracking-tight text-ink-900">
+              Avancement des stages
+            </h2>
+            <span className="font-mono text-[11px] uppercase tracking-wider text-ink-400">
+              {stats?.totalStages || 0} suivi(s)
+            </span>
+          </header>
           <StageStatusBar
             enCours={stats?.stagesEnCours || 0}
             termines={stats?.stagesTermines || 0}
             valides={stats?.stagesValides || 0}
             total={stats?.totalStages || 0}
           />
-        </div>
+        </article>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h2 className="text-base font-semibold text-gray-800 mb-4">Rapports de stage</h2>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Déposés</span>
-              <span className="text-sm font-medium bg-gray-100 px-2.5 py-0.5 rounded-full">{stats?.rapportsDeposes || 0}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Évalués</span>
-              <span className="text-sm font-medium bg-amber-50 text-amber-700 px-2.5 py-0.5 rounded-full">{stats?.rapportsEvalues || 0}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Validés</span>
-              <span className="text-sm font-medium bg-green-50 text-green-700 px-2.5 py-0.5 rounded-full">{stats?.rapportsValides || 0}</span>
-            </div>
-            <div className="flex justify-between items-center border-t pt-3 mt-3">
-              <span className="text-sm font-medium text-gray-700">Total</span>
-              <span className="text-sm font-semibold">{stats?.totalRapports || 0}</span>
-            </div>
+        <article className="sygle-lift rounded-sm border border-ink-200 bg-white p-6">
+          <header className="mb-5 flex items-baseline justify-between border-b border-ink-100 pb-3">
+            <h2 className="font-display text-lg font-medium tracking-tight text-ink-900">
+              Rapports de stage
+            </h2>
+            <span className="font-mono text-[11px] uppercase tracking-wider text-ink-400">
+              Suivi
+            </span>
+          </header>
+          <RapportRow label="Déposés, en attente de note" value={stats?.rapportsDeposes || 0} />
+          <RapportRow label="Notés par un prof" value={stats?.rapportsEvalues || 0} />
+          <RapportRow label="Validés par l'admin" value={stats?.rapportsValides || 0} />
+          <div className="mt-3 flex items-baseline justify-between border-t border-ink-200 pt-3">
+            <span className="font-mono text-[11px] uppercase tracking-wider text-ink-500">Total</span>
+            <span className="font-display text-xl tabular-nums text-ink-900">
+              {stats?.totalRapports || 0}
+            </span>
           </div>
-        </div>
-      </div>
+        </article>
+      </section>
     </div>
   );
 }

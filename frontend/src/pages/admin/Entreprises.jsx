@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
-
-const inputClass = 'w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400';
+import { ui } from '../../components/common/ui';
 
 function EntrepriseModal({ entreprise, onClose, onSave }) {
   const [form, setForm] = useState({
@@ -23,30 +22,41 @@ function EntrepriseModal({ entreprise, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-      <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white shadow-lg">
-        <div className="border-b border-slate-100 px-5 py-4">
-          <h2 className="text-base font-semibold text-slate-900">
-            {entreprise ? 'Modifier une entreprise' : 'Créer une entreprise'}
+    <div className={ui.modalOverlay}>
+      <div className={ui.modalPanel}>
+        <div className={ui.modalHeader}>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent-600">
+            {entreprise ? 'Édition' : 'Nouveau partenaire'}
+          </p>
+          <h2 className={ui.modalTitle}>
+            {entreprise ? entreprise.nom : 'Ajouter une entreprise'}
           </h2>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-3 px-5 py-4">
-          <input className={inputClass} placeholder="Nom *"
-            value={form.nom} onChange={e => setForm({ ...form, nom: e.target.value })} required />
-          <input className={inputClass} placeholder="Secteur"
-            value={form.secteur} onChange={e => setForm({ ...form, secteur: e.target.value })} />
-          <textarea className={inputClass} placeholder="Adresse" rows={2}
-            value={form.adresse} onChange={e => setForm({ ...form, adresse: e.target.value })} />
-          <input className={inputClass} placeholder="Email contact" type="email"
-            value={form.emailContact} onChange={e => setForm({ ...form, emailContact: e.target.value })} />
-          <div className="flex justify-end gap-2 pt-1">
-            <button type="button" onClick={onClose}
-              className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-              Annuler
-            </button>
-            <button type="submit"
-              className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
-              {entreprise ? 'Enregistrer' : 'Créer'}
+        <form onSubmit={handleSubmit} className={ui.modalBody}>
+          <div>
+            <label className={ui.label}>Raison sociale</label>
+            <input className={ui.input} value={form.nom}
+              onChange={e => setForm({ ...form, nom: e.target.value })} required />
+          </div>
+          <div>
+            <label className={ui.label}>Secteur d'activité</label>
+            <input className={ui.input} placeholder="Conseil, industrie, services..." value={form.secteur}
+              onChange={e => setForm({ ...form, secteur: e.target.value })} />
+          </div>
+          <div>
+            <label className={ui.label}>Adresse postale</label>
+            <textarea className={ui.input} rows={2} value={form.adresse}
+              onChange={e => setForm({ ...form, adresse: e.target.value })} />
+          </div>
+          <div>
+            <label className={ui.label}>Email de contact</label>
+            <input className={ui.input} type="email" value={form.emailContact}
+              onChange={e => setForm({ ...form, emailContact: e.target.value })} />
+          </div>
+          <div className={ui.modalFooter}>
+            <button type="button" onClick={onClose} className={ui.btnSecondary}>Annuler</button>
+            <button type="submit" className={ui.btnPrimary}>
+              {entreprise ? 'Enregistrer' : 'Ajouter'}
             </button>
           </div>
         </form>
@@ -79,7 +89,7 @@ export default function Entreprises() {
   };
 
   const handleDelete = (id) => {
-    if (!window.confirm('Supprimer cette entreprise ?')) return;
+    if (!window.confirm('Confirmer la suppression de cette entreprise ?')) return;
     api.delete(`/entreprises/${id}`).then(() => loadEntreprises()).catch(console.error);
   };
 
@@ -87,58 +97,83 @@ export default function Entreprises() {
     `${e.nom} ${e.secteur || ''} ${e.emailContact || ''}`.toLowerCase().includes(search.toLowerCase())
   );
 
-  if (loading) return <div className="flex h-64 items-center justify-center text-sm text-slate-400">Chargement...</div>;
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-400">Chargement...</p>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <div className="mb-6 flex items-end justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900">Entreprises partenaires</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {entreprises.length} entreprise{entreprises.length > 1 ? 's' : ''}
-          </p>
+      <header className={ui.pageHeader}>
+        <div className="flex items-end justify-between gap-6">
+          <div>
+            <p className={ui.kicker}>Entreprises</p>
+            <h1 className={ui.pageTitle}>Entreprises partenaires</h1>
+            <p className={ui.pageLead}>
+              {entreprises.length} entreprise{entreprises.length > 1 ? 's' : ''} qui accueille
+              {entreprises.length > 1 ? 'nt' : ''} des stagiaires de l'ESEO.
+            </p>
+          </div>
+          <button onClick={() => { setEditing(null); setShowModal(true); }} className={ui.btnPrimary}>
+            Ajouter une entreprise
+          </button>
         </div>
-        <button onClick={() => { setEditing(null); setShowModal(true); }}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
-          Créer une entreprise
-        </button>
+      </header>
+
+      <div className="mb-4 max-w-md">
+        <input className={ui.input} placeholder="Rechercher par raison sociale, secteur..."
+          value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
-      <input className={`${inputClass} mb-4`} placeholder="Rechercher une entreprise..."
-        value={search} onChange={e => setSearch(e.target.value)} />
-
-      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-        <table className="w-full text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-left text-slate-600">
+      <div className={ui.tableWrap}>
+        <table className={ui.table}>
+          <thead className={ui.thead}>
             <tr>
-              <th className="px-4 py-3 font-medium">Nom</th>
-              <th className="px-4 py-3 font-medium">Secteur</th>
-              <th className="px-4 py-3 font-medium">Adresse</th>
-              <th className="px-4 py-3 font-medium">Email</th>
-              <th className="px-4 py-3 text-right font-medium">Actions</th>
+              <th className={ui.th}>Raison sociale</th>
+              <th className={ui.th}>Secteur</th>
+              <th className={ui.th}>Adresse</th>
+              <th className={ui.th}>Contact</th>
+              <th className={`${ui.th} text-right`}>Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className={ui.tbody}>
             {filtered.map(e => (
-              <tr key={e.siretEntreprise} className="hover:bg-slate-50">
-                <td className="px-4 py-3 font-medium text-slate-900">{e.nom}</td>
-                <td className="px-4 py-3 text-slate-600">{e.secteur || '-'}</td>
-                <td className="px-4 py-3 text-slate-600">{e.adresse || '-'}</td>
-                <td className="px-4 py-3 text-slate-600">{e.emailContact || '-'}</td>
+              <tr key={e.siretEntreprise} className={ui.tr}>
+                <td className={ui.tdStrong}>
+                  <span className="font-display text-base">{e.nom}</span>
+                </td>
+                <td className={ui.td}>{e.secteur || '-'}</td>
+                <td className={`${ui.td} max-w-xs truncate`}>{e.adresse || '-'}</td>
+                <td className={ui.td}>{e.emailContact || '-'}</td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-3">
-                    <button onClick={() => { setEditing(e); setShowModal(true); }} className="text-sm font-medium text-slate-700 hover:text-slate-900">Modifier</button>
-                    <button onClick={() => handleDelete(e.siretEntreprise)} className="text-sm font-medium text-red-600 hover:text-red-700">Supprimer</button>
+                    <button onClick={() => { setEditing(e); setShowModal(true); }}
+                      className="text-sm text-ink-600 transition hover:text-brand-700">Éditer</button>
+                    <button onClick={() => handleDelete(e.siretEntreprise)}
+                      className="text-sm text-accent-600 transition hover:text-accent-700">Supprimer</button>
                   </div>
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && <tr><td colSpan={5} className="px-4 py-10 text-center text-slate-400">Aucune entreprise</td></tr>}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={5} className="px-4 py-12 text-center text-sm text-ink-500">
+                  Aucune entreprise ne correspond à votre recherche.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
-      {showModal && <EntrepriseModal entreprise={editing} onClose={() => { setShowModal(false); setEditing(null); }} onSave={handleSave} />}
+      {showModal && (
+        <EntrepriseModal entreprise={editing}
+          onClose={() => { setShowModal(false); setEditing(null); }}
+          onSave={handleSave} />
+      )}
     </div>
   );
 }
