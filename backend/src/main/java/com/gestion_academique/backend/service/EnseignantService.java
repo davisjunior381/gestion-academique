@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,7 @@ public class EnseignantService {
     private final EnseignantRepository enseignantRepository;
     private final ModuleRepository moduleRepository;
     private final EntityManager entityManager;
+    private final PasswordEncoder passwordEncoder;
 
     public List<EnseignantResponseDTO> getAll() {
         return enseignantRepository.findAll().stream()
@@ -55,7 +57,7 @@ public class EnseignantService {
         enseignant.setNom(dto.getNom());
         enseignant.setPrenom(dto.getPrenom());
         enseignant.setEmail(dto.getEmail());
-        enseignant.setMotDePasse(dto.getMotDePasse());
+        enseignant.setMotDePasse(passwordEncoder.encode(dto.getMotDePasse()));
         enseignant.setGrade(dto.getGrade());
         enseignant.setSpecialite(dto.getSpecialite());
         enseignant.setDepartement(dto.getDepartement());
@@ -77,7 +79,7 @@ public class EnseignantService {
         enseignant.setNom(dto.getNom());
         enseignant.setPrenom(dto.getPrenom());
         enseignant.setEmail(dto.getEmail());
-        enseignant.setMotDePasse(dto.getMotDePasse());
+        enseignant.setMotDePasse(passwordEncoder.encode(dto.getMotDePasse()));
         enseignant.setGrade(dto.getGrade());
         enseignant.setSpecialite(dto.getSpecialite());
         enseignant.setDepartement(dto.getDepartement());

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +25,7 @@ public class ApprenantService {
 
     private final ApprenantRepository apprenantRepository;
     private final EntityManager entityManager;
+    private final PasswordEncoder passwordEncoder;
     private final FiliereService filiereService;
     private final PromotionService promotionService;
 
@@ -56,7 +58,7 @@ public class ApprenantService {
         apprenant.setNom(dto.getNom());
         apprenant.setPrenom(dto.getPrenom());
         apprenant.setEmail(dto.getEmail());
-        apprenant.setMotDePasse(dto.getMotDePasse());
+        apprenant.setMotDePasse(passwordEncoder.encode(dto.getMotDePasse()));
         apprenant.setNumEtudiant(dto.getNumEtudiant());
         apprenant.setDateInscription(LocalDate.now());
 
@@ -89,7 +91,7 @@ public class ApprenantService {
         apprenant.setNom(dto.getNom());
         apprenant.setPrenom(dto.getPrenom());
         apprenant.setEmail(dto.getEmail());
-        apprenant.setMotDePasse(dto.getMotDePasse());
+        apprenant.setMotDePasse(passwordEncoder.encode(dto.getMotDePasse()));
         apprenant.setNumEtudiant(dto.getNumEtudiant());
 
         if (dto.getFiliereId() != null) {
