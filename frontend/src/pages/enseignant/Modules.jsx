@@ -14,15 +14,15 @@ export default function Modules() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p className="text-gray-400">Chargement...</p>;
+  if (loading) return <div className="flex h-64 items-center justify-center text-sm text-slate-400">Chargement...</div>;
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-800 mb-6">Mes modules</h1>
+      <h1 className="mb-6 text-xl font-semibold text-slate-900">Mes modules</h1>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-        <p className="text-gray-400">Aucun module affecté pour le moment.</p>
-        <p className="text-xs text-gray-300 mt-2">Les modules apparaîtront ici une fois affectés par l'administrateur.</p>
+      <div className="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+        <p className="text-sm text-slate-500">Aucun module affecté pour le moment.</p>
+        <p className="mt-2 text-xs text-slate-400">Les modules apparaîtront ici une fois affectés par l'administrateur.</p>
       </div>
     </div>
   );

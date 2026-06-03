@@ -17,10 +17,8 @@ export default function StagesEncadres() {
   useEffect(() => {
     const fetchStages = async () => {
       try {
-        // Récupère l'ID de l'enseignant connecté via son email
         const enseignants = await api.get('/enseignants');
         const moi = enseignants.data.find(e => e.email === user?.email);
-        
         if (moi) {
           const res = await api.get(`/stages/encadrant/${moi.codeUtilisateur}`);
           setStages(res.data);
@@ -34,43 +32,39 @@ export default function StagesEncadres() {
     fetchStages();
   }, [user]);
 
-  if (loading) return <p className="text-gray-400">Chargement...</p>;
+  if (loading) return <p className="text-slate-400">Chargement...</p>;
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-800 mb-6">Stages encadrés</h1>
+      <h1 className="text-2xl font-semibold text-slate-800 mb-6">Stages encadrés</h1>
 
       {stages.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-          <p className="text-gray-400">Aucun stage encadré pour le moment.</p>
+        <div className="bg-white rounded-xl border border-dashed border-slate-200 p-8 text-center">
+          <p className="text-slate-400">Aucun stage encadré pour le moment.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Titre</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Apprenant</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Entreprise</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Dates</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Statut</th>
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Titre</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Apprenant</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Entreprise</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Dates</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Statut</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               {stages.map(stage => (
-                <tr key={stage.refStage} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm font-medium text-gray-800">{stage.titre}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
+                <tr key={stage.refStage} className="hover:bg-slate-50">
+                  <td className="px-4 py-3 text-sm font-medium text-slate-800">{stage.titre}</td>
+                  <td className="px-4 py-3 text-sm text-slate-600">
                     {stage.apprenantNom ? `${stage.apprenantPrenom} ${stage.apprenantNom}` : 'Non affecté'}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
-                    {stage.entrepriseNom || '-'}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">
-                    {stage.dateDebut} → {stage.dateFin}
-                  </td>
+                  <td className="px-4 py-3 text-sm text-slate-600">{stage.entrepriseNom || '-'}</td>
+                  <td className="px-4 py-3 text-sm text-slate-500">{stage.dateDebut} → {stage.dateFin}</td>
                   <td className="px-4 py-3">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${statutColors[stage.statut]}`}>
+                    <span className={`px-2.5 py-1 rounded-md ring-1 ring-inset text-xs font-medium ${statutColors[stage.statut]}`}>
                       {stage.statut.replace('_', ' ')}
                     </span>
                   </td>
