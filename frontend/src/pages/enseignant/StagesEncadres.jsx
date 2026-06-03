@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 
 const statutColors = {
@@ -9,15 +10,29 @@ const statutColors = {
 };
 
 export default function StagesEncadres() {
+  const { user } = useAuth();
   const [stages, setStages] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/stages')
-      .then(res => setStages(res.data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+    const fetchStages = async () => {
+      try {
+        // Récupère l'ID de l'enseignant connecté via son email
+        const enseignants = await api.get('/enseignants');
+        const moi = enseignants.data.find(e => e.email === user?.email);
+        
+        if (moi) {
+          const res = await api.get(`/stages/encadrant/${moi.codeUtilisateur}`);
+          setStages(res.data);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStages();
+  }, [user]);
 
   if (loading) return <p className="text-gray-400">Chargement...</p>;
 
@@ -27,7 +42,7 @@ export default function StagesEncadres() {
 
       {stages.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-          <p className="text-gray-400">Aucun stage pour le moment.</p>
+          <p className="text-gray-400">Aucun stage encadré pour le moment.</p>
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -36,6 +51,7 @@ export default function StagesEncadres() {
               <tr className="bg-gray-50 border-b border-gray-200">
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Titre</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Apprenant</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Entreprise</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Dates</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Statut</th>
               </tr>
@@ -46,6 +62,9 @@ export default function StagesEncadres() {
                   <td className="px-4 py-3 text-sm font-medium text-gray-800">{stage.titre}</td>
                   <td className="px-4 py-3 text-sm text-gray-600">
                     {stage.apprenantNom ? `${stage.apprenantPrenom} ${stage.apprenantNom}` : 'Non affecté'}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-600">
+                    {stage.entrepriseNom || '-'}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-500">
                     {stage.dateDebut} → {stage.dateFin}

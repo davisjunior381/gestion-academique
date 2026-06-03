@@ -11,15 +11,20 @@ export default function EnseignantDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [stages, rapports] = await Promise.all([
-          api.get('/stages').catch(() => ({ data: [] })),
-          api.get('/rapports').catch(() => ({ data: [] })),
-        ]);
-        setStats({
-          stages: stages.data.filter(s => s.encadrantId === user?.codeUtilisateur).length || stages.data.length,
-          rapports: rapports.data.length,
-          rapportsAEvaluer: rapports.data.filter(r => r.statut === 'DEPOSE').length,
-        });
+        const enseignants = await api.get('/enseignants');
+        const moi = enseignants.data.find(e => e.email === user?.email);
+
+        if (moi) {
+          const [stages, rapports] = await Promise.all([
+            api.get(`/stages/encadrant/${moi.codeUtilisateur}`).catch(() => ({ data: [] })),
+            api.get(`/rapports/evaluateur/${moi.codeUtilisateur}`).catch(() => ({ data: [] })),
+          ]);
+          setStats({
+            stages: stages.data.length,
+            rapports: rapports.data.length,
+            rapportsAEvaluer: rapports.data.filter(r => r.statut === 'DEPOSE').length,
+          });
+        }
       } catch (e) { console.error(e); }
       setLoading(false);
     };
@@ -41,7 +46,7 @@ export default function EnseignantDashboard() {
           <p className="text-3xl font-semibold text-gray-800 mt-1">{stats.stages}</p>
         </Link>
         <Link to="/enseignant/rapports" className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-sm transition">
-          <p className="text-sm text-gray-500">Rapports total</p>
+          <p className="text-sm text-gray-500">Rapports évalués</p>
           <p className="text-3xl font-semibold text-gray-800 mt-1">{stats.rapports}</p>
         </Link>
         <Link to="/enseignant/rapports" className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-sm transition">
