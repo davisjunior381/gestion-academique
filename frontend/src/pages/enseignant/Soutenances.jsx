@@ -24,10 +24,10 @@ export default function Soutenances() {
   return (
     <div>
       <header className={ui.pageHeader}>
-        <p className={ui.kicker}>Vos jurys</p>
-        <h1 className={ui.pageTitle}>Soutenances</h1>
+        <p className={ui.kicker}>Soutenances de la promotion</p>
+        <h1 className={ui.pageTitle}>Soutenances planifiées</h1>
         <p className={ui.pageLead}>
-          Les soutenances où vous êtes membre du jury.
+          Toutes les soutenances de l'année. Les jurys nominatifs seront affichés ici dès qu'ils seront constitués.
         </p>
       </header>
 
@@ -37,7 +37,7 @@ export default function Soutenances() {
             Aucune soutenance pour l'instant.
           </p>
           <p className="mx-auto mt-3 max-w-md text-sm text-ink-500">
-            Vous serez ajouté ici dès que l'admin vous mettra dans un jury.
+            Les soutenances s'afficheront ici dès qu'elles seront planifiées par l'admin.
           </p>
         </div>
       ) : (

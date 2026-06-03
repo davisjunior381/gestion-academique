@@ -6,6 +6,7 @@ import com.gestion_academique.backend.service.JuryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,26 +30,31 @@ public class JuryController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<JuryResponseDTO> create(@RequestBody JuryRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(juryService.create(dto));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<JuryResponseDTO> update(@PathVariable Long id, @RequestBody JuryRequestDTO dto) {
         return ResponseEntity.ok(juryService.update(id, dto));
     }
 
     @PostMapping("/{id}/membres/{enseignantId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<JuryResponseDTO> ajouterMembre(@PathVariable Long id, @PathVariable Long enseignantId) {
         return ResponseEntity.ok(juryService.ajouterMembre(id, enseignantId));
     }
 
     @DeleteMapping("/{id}/membres/{enseignantId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<JuryResponseDTO> retirerMembre(@PathVariable Long id, @PathVariable Long enseignantId) {
         return ResponseEntity.ok(juryService.retirerMembre(id, enseignantId));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         juryService.delete(id);
         return ResponseEntity.noContent().build();

@@ -51,7 +51,7 @@ export default function Sidebar() {
     <aside className="flex w-64 shrink-0 flex-col border-r border-ink-200 bg-white">
       <div className="border-b border-ink-200 px-6 py-6">
         <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-400">
-          ESEO Paris-Vélizy
+          ESEO Angers
         </p>
         <h1 className="mt-1 font-display text-2xl font-medium leading-none tracking-tight text-ink-900">
           Sygle<span className="text-accent-500">.</span>

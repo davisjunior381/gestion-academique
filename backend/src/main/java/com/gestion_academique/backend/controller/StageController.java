@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,21 +54,25 @@ public class StageController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<StageResponseDTO> create(@Valid @RequestBody StageRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(stageService.create(dto));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<StageResponseDTO> update(@PathVariable Long id, @Valid @RequestBody StageRequestDTO dto) {
         return ResponseEntity.ok(stageService.update(id, dto));
     }
 
     @PatchMapping("/{id}/statut")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENSEIGNANT')")
     public ResponseEntity<StageResponseDTO> updateStatut(@PathVariable Long id, @RequestParam StatutStage statut) {
         return ResponseEntity.ok(stageService.updateStatut(id, statut));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         stageService.delete(id);
         return ResponseEntity.noContent().build();
