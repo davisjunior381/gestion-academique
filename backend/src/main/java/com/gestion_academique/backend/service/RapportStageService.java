@@ -12,6 +12,8 @@ import com.gestion_academique.backend.repository.RapportStageRepository;
 import com.gestion_academique.backend.repository.StageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.persistence.EntityManager;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -181,6 +184,50 @@ public class RapportStageService {
             throw new ResourceNotFoundException("Rapport non trouvé avec l'id: " + id);
         }
         rapportRepository.deleteById(id);
+    }
+
+    /**
+     * Récupère le fichier PDF d'un rapport pour consultation.
+     * Vérifie que l'utilisateur connecté a le droit d'y accéder :
+     *  - ADMIN : accès complet
+     *  - APPRENANT : seulement son propre rapport (stage dont il est propriétaire)
+     *  - ENSEIGNANT : seulement s'il est encadrant du stage ou évaluateur désigné du rapport
+     */
+    public Resource recupererFichier(Long rapportId, Long userId, String role) {
+        RapportStage rapport = rapportRepository.findById(rapportId)
+                .orElseThrow(() -> new ResourceNotFoundException("Rapport non trouvé avec l'id: " + rapportId));
+
+        boolean autorise = switch (role) {
+            case "ADMIN" -> true;
+            case "APPRENANT" -> rapport.getStage() != null
+                    && rapport.getStage().getApprenant() != null
+                    && rapport.getStage().getApprenant().getCodeUtilisateur().equals(userId);
+            case "ENSEIGNANT" -> (rapport.getStage() != null
+                    && rapport.getStage().getEncadrant() != null
+                    && rapport.getStage().getEncadrant().getCodeUtilisateur().equals(userId))
+                    || (rapport.getEvaluateur() != null
+                    && rapport.getEvaluateur().getCodeUtilisateur().equals(userId));
+            default -> false;
+        };
+
+        if (!autorise) {
+            throw new AccessDeniedException("Vous n'avez pas le droit de consulter ce rapport");
+        }
+
+        if (rapport.getFichierPdf() == null || rapport.getFichierPdf().isBlank()) {
+            throw new ResourceNotFoundException("Aucun fichier associé à ce rapport");
+        }
+
+        try {
+            Path filePath = Paths.get(rapport.getFichierPdf());
+            Resource resource = new UrlResource(filePath.toUri());
+            if (!resource.exists() || !resource.isReadable()) {
+                throw new ResourceNotFoundException("Fichier PDF introuvable sur le serveur");
+            }
+            return resource;
+        } catch (MalformedURLException e) {
+            throw new IllegalStateException("Chemin du fichier invalide", e);
+        }
     }
 
     private RapportResponseDTO toResponseDTO(RapportStage rapport) {

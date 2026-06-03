@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { ui, badgeClass, statutLabel, formatDateFR } from '../../components/common/ui';
+import { ui, badgeClass, statutLabel, formatDateFR, ouvrirRapportPDF } from '../../components/common/ui';
 
 export default function Rapports() {
   const [rapports, setRapports] = useState([]);
@@ -123,6 +123,11 @@ export default function Rapports() {
                 )}
 
                 <div className="mt-5 flex flex-wrap gap-2 border-t border-ink-100 pt-4">
+                  <button
+                    onClick={() => ouvrirRapportPDF(rapport.refRapport)}
+                    className={ui.btnSecondary}>
+                    Consulter le rapport
+                  </button>
                   {rapport.statut === 'DEPOSE' && (
                     <button
                       onClick={() => setEvalModal(rapport.refRapport)}

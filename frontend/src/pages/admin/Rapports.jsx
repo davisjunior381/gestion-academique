@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { ui, badgeClass, statutLabel, formatDateFR } from '../../components/common/ui';
+import { ui, badgeClass, statutLabel, formatDateFR, ouvrirRapportPDF } from '../../components/common/ui';
 
 const FILTERS = [
   { value: '', label: 'Tous' },
@@ -174,6 +174,8 @@ export default function Rapports() {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-3">
+                    <button onClick={() => ouvrirRapportPDF(r.refRapport)}
+                      className="text-sm text-ink-700 transition hover:text-brand-700">Consulter</button>
                     {r.statut === 'DEPOSE' && (
                       <button onClick={() => setEvaluating(r)}
                         className="text-sm text-brand-700 transition hover:text-brand-800">Évaluer</button>

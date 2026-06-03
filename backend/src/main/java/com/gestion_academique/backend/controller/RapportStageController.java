@@ -7,6 +7,8 @@ import com.gestion_academique.backend.security.UserDetailsImpl;
 import com.gestion_academique.backend.service.RapportStageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -87,5 +89,24 @@ public class RapportStageController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         rapportService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Renvoie le fichier PDF d'un rapport pour consultation dans le navigateur.
+     * Permissions vérifiées dans le service selon le rôle :
+     *  - ADMIN : accès complet
+     *  - APPRENANT : son propre rapport uniquement
+     *  - ENSEIGNANT : rapport d'un stage qu'il encadre ou dont il est évaluateur
+     */
+    @GetMapping("/{id}/fichier")
+    public ResponseEntity<Resource> telechargerFichier(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetailsImpl user) {
+        Resource resource = rapportService.recupererFichier(id, user.getId(), user.getRole());
+        String filename = resource.getFilename() != null ? resource.getFilename() : "rapport-" + id + ".pdf";
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
+                .body(resource);
     }
 }

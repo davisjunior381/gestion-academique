@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { ui, badgeClass, statutLabel, formatDateFR } from '../../components/common/ui';
+import { ui, badgeClass, statutLabel, formatDateFR, ouvrirRapportPDF } from '../../components/common/ui';
 
 function DepotModal({ onClose, onSave }) {
   const [stageId, setStageId] = useState('');
@@ -168,6 +168,12 @@ export default function Rapports() {
                       «&nbsp;{r.commentaire}&nbsp;»
                     </blockquote>
                   )}
+
+                  <div className="mt-4">
+                    <button onClick={() => ouvrirRapportPDF(r.refRapport)} className={ui.btnSecondary}>
+                      Consulter mon rapport
+                    </button>
+                  </div>
                 </div>
 
                 <div className="px-6 py-5 md:py-5">
