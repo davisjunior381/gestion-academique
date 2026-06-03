@@ -27,6 +27,7 @@ public class RapportStageController {
     private final RapportStageService rapportService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENSEIGNANT')")
     public ResponseEntity<List<RapportResponseDTO>> getAll() {
         return ResponseEntity.ok(rapportService.getAll());
     }
@@ -47,11 +48,13 @@ public class RapportStageController {
     }
 
     @GetMapping("/statut/{statut}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENSEIGNANT')")
     public ResponseEntity<List<RapportResponseDTO>> getByStatut(@PathVariable StatutRapport statut) {
         return ResponseEntity.ok(rapportService.getByStatut(statut));
     }
 
     @GetMapping("/evaluateur/{evaluateurId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENSEIGNANT')")
     public ResponseEntity<List<RapportResponseDTO>> getByEvaluateur(@PathVariable Long evaluateurId) {
         return ResponseEntity.ok(rapportService.getByEvaluateur(evaluateurId));
     }
@@ -67,6 +70,7 @@ public class RapportStageController {
     }
 
     @PostMapping("/{rapportId}/evaluer")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENSEIGNANT')")
     public ResponseEntity<RapportResponseDTO> evaluer(
             @PathVariable Long rapportId,
             @Valid @RequestBody EvaluationDTO dto) {
@@ -74,16 +78,19 @@ public class RapportStageController {
     }
 
     @PatchMapping("/{rapportId}/valider")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENSEIGNANT')")
     public ResponseEntity<RapportResponseDTO> valider(@PathVariable Long rapportId) {
         return ResponseEntity.ok(rapportService.valider(rapportId));
     }
 
     @PatchMapping("/{rapportId}/rejeter")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENSEIGNANT')")
     public ResponseEntity<RapportResponseDTO> rejeter(@PathVariable Long rapportId) {
         return ResponseEntity.ok(rapportService.rejeter(rapportId));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENSEIGNANT')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         rapportService.delete(id);
         return ResponseEntity.noContent().build();

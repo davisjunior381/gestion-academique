@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,18 +36,21 @@ public class PromotionController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Créer une promotion")
     public ResponseEntity<PromotionResponseDTO> create(@Valid @RequestBody PromotionRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(promotionService.create(dto));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Mettre à jour une promotion")
     public ResponseEntity<PromotionResponseDTO> update(@PathVariable Long id, @Valid @RequestBody PromotionRequestDTO dto) {
         return ResponseEntity.ok(promotionService.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Supprimer une promotion")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         promotionService.delete(id);

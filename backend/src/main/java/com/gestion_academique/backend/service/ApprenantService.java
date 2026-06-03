@@ -8,7 +8,9 @@ import com.gestion_academique.backend.entity.Promotion;
 import com.gestion_academique.backend.entity.Role;
 import com.gestion_academique.backend.exception.ResourceNotFoundException;
 import com.gestion_academique.backend.repository.ApprenantRepository;
+import com.gestion_academique.backend.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,10 +24,14 @@ import java.util.stream.Collectors;
 @Transactional
 public class ApprenantService {
 
+    private static final String DEFAULT_ROLE_NAME = "APPRENANT";
+
     private final ApprenantRepository apprenantRepository;
     private final EntityManager entityManager;
     private final FiliereService filiereService;
     private final PromotionService promotionService;
+    private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     public List<ApprenantResponseDTO> getAll() {
         return apprenantRepository.findAll().stream()
@@ -56,7 +62,12 @@ public class ApprenantService {
         apprenant.setNom(dto.getNom());
         apprenant.setPrenom(dto.getPrenom());
         apprenant.setEmail(dto.getEmail());
-        apprenant.setMotDePasse(dto.getMotDePasse());
+
+        if (dto.getMotDePasse() == null || dto.getMotDePasse().isBlank()) {
+            throw new IllegalArgumentException("Le mot de passe est obligatoire à la création");
+        }
+        apprenant.setMotDePasse(passwordEncoder.encode(dto.getMotDePasse()));
+
         apprenant.setNumEtudiant(dto.getNumEtudiant());
         apprenant.setDateInscription(LocalDate.now());
 
@@ -72,11 +83,16 @@ public class ApprenantService {
             apprenant.setPromotion(promotion);
         }
 
+        Role role;
         if (dto.getRoleId() != null) {
-            Role role = entityManager.find(Role.class, dto.getRoleId());
+            role = entityManager.find(Role.class, dto.getRoleId());
             if (role == null) throw new ResourceNotFoundException("Rôle non trouvé avec l'id: " + dto.getRoleId());
-            apprenant.setRole(role);
+        } else {
+            role = roleRepository.findByNom(DEFAULT_ROLE_NAME)
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Rôle par défaut introuvable: " + DEFAULT_ROLE_NAME));
         }
+        apprenant.setRole(role);
 
         Apprenant saved = apprenantRepository.save(apprenant);
         return toResponseDTO(saved);
@@ -89,7 +105,11 @@ public class ApprenantService {
         apprenant.setNom(dto.getNom());
         apprenant.setPrenom(dto.getPrenom());
         apprenant.setEmail(dto.getEmail());
-        apprenant.setMotDePasse(dto.getMotDePasse());
+
+        if (dto.getMotDePasse() != null && !dto.getMotDePasse().isBlank()) {
+            apprenant.setMotDePasse(passwordEncoder.encode(dto.getMotDePasse()));
+        }
+
         apprenant.setNumEtudiant(dto.getNumEtudiant());
 
         if (dto.getFiliereId() != null) {

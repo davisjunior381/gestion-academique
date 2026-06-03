@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,16 +42,19 @@ public class EnseignantController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EnseignantResponseDTO> create(@Valid @RequestBody EnseignantRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(enseignantService.create(dto));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EnseignantResponseDTO> update(@PathVariable Long id, @Valid @RequestBody EnseignantRequestDTO dto) {
         return ResponseEntity.ok(enseignantService.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         enseignantService.delete(id);
         return ResponseEntity.noContent().build();
@@ -62,11 +66,13 @@ public class EnseignantController {
     }
 
     @PostMapping("/{id}/modules/{moduleId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EnseignantResponseDTO> affecterModule(@PathVariable Long id, @PathVariable Long moduleId) {
         return ResponseEntity.ok(enseignantService.affecterModule(id, moduleId));
     }
 
     @DeleteMapping("/{id}/modules/{moduleId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EnseignantResponseDTO> retirerModule(@PathVariable Long id, @PathVariable Long moduleId) {
         return ResponseEntity.ok(enseignantService.retirerModule(id, moduleId));
     }

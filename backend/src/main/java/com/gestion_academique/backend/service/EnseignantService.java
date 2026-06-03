@@ -9,7 +9,9 @@ import com.gestion_academique.backend.entity.Role;
 import com.gestion_academique.backend.exception.ResourceNotFoundException;
 import com.gestion_academique.backend.repository.EnseignantRepository;
 import com.gestion_academique.backend.repository.ModuleRepository;
+import com.gestion_academique.backend.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,9 +24,13 @@ import java.util.stream.Collectors;
 @Transactional
 public class EnseignantService {
 
+    private static final String DEFAULT_ROLE_NAME = "ENSEIGNANT";
+
     private final EnseignantRepository enseignantRepository;
     private final ModuleRepository moduleRepository;
     private final EntityManager entityManager;
+    private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     public List<EnseignantResponseDTO> getAll() {
         return enseignantRepository.findAll().stream()
@@ -55,16 +61,26 @@ public class EnseignantService {
         enseignant.setNom(dto.getNom());
         enseignant.setPrenom(dto.getPrenom());
         enseignant.setEmail(dto.getEmail());
-        enseignant.setMotDePasse(dto.getMotDePasse());
+
+        if (dto.getMotDePasse() == null || dto.getMotDePasse().isBlank()) {
+            throw new IllegalArgumentException("Le mot de passe est obligatoire à la création");
+        }
+        enseignant.setMotDePasse(passwordEncoder.encode(dto.getMotDePasse()));
+
         enseignant.setGrade(dto.getGrade());
         enseignant.setSpecialite(dto.getSpecialite());
         enseignant.setDepartement(dto.getDepartement());
 
+        Role role;
         if (dto.getRoleId() != null) {
-            Role role = entityManager.find(Role.class, dto.getRoleId());
+            role = entityManager.find(Role.class, dto.getRoleId());
             if (role == null) throw new ResourceNotFoundException("Rôle non trouvé avec l'id: " + dto.getRoleId());
-            enseignant.setRole(role);
+        } else {
+            role = roleRepository.findByNom(DEFAULT_ROLE_NAME)
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Rôle par défaut introuvable: " + DEFAULT_ROLE_NAME));
         }
+        enseignant.setRole(role);
 
         Enseignant saved = enseignantRepository.save(enseignant);
         return toResponseDTO(saved);
@@ -77,7 +93,11 @@ public class EnseignantService {
         enseignant.setNom(dto.getNom());
         enseignant.setPrenom(dto.getPrenom());
         enseignant.setEmail(dto.getEmail());
-        enseignant.setMotDePasse(dto.getMotDePasse());
+
+        if (dto.getMotDePasse() != null && !dto.getMotDePasse().isBlank()) {
+            enseignant.setMotDePasse(passwordEncoder.encode(dto.getMotDePasse()));
+        }
+
         enseignant.setGrade(dto.getGrade());
         enseignant.setSpecialite(dto.getSpecialite());
         enseignant.setDepartement(dto.getDepartement());

@@ -16,7 +16,7 @@ export default function Layout() {
         <footer className="border-t border-ink-200 bg-white">
           <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-8 py-4 text-xs text-ink-400">
             <span className="font-mono uppercase tracking-wider">
-              Sygle - ESEO Paris-Vélizy
+              Sygle - ESEO Angers
             </span>
             <span>Année 2025 - 2026</span>
           </div>

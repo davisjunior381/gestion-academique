@@ -32,7 +32,7 @@ export default function Login() {
       <aside className="relative hidden w-5/12 flex-col justify-between overflow-hidden border-r border-ink-200 bg-brand-800 px-12 py-12 text-ink-50 lg:flex">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-brand-200">
-            ESEO Paris-Vélizy
+            ESEO Angers
           </p>
           <h1 className="mt-4 font-display text-5xl font-medium leading-[1.05] tracking-tight">
             Sygle<span className="text-accent-300">.</span>
@@ -66,7 +66,7 @@ export default function Login() {
         <div className="w-full max-w-sm">
           <div className="mb-8 lg:hidden">
             <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-accent-600">
-              ESEO Paris-Vélizy
+              ESEO Angers
             </p>
             <h1 className="mt-2 font-display text-4xl font-medium tracking-tight text-ink-900">
               Sygle<span className="text-accent-500">.</span>
