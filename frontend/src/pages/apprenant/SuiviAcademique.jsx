@@ -9,59 +9,62 @@ export default function SuiviAcademique() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user?.codeUtilisateur) {
-      setLoading(false);
-      return;
-    }
-    const id = user.codeUtilisateur;
-    Promise.all([
-      api.get(`/suivi-academique/apprenant/${id}`).then(res => res.data),
-      api.get(`/suivi-academique/apprenant/${id}/moyenne`).then(res => res.data)
-    ]).then(([s, m]) => {
-      setSuivis(s);
-      setMoyenne(m);
-    }).catch(console.error)
-      .finally(() => setLoading(false));
+    const fetchSuivi = async () => {
+      try {
+        const apprenants = await api.get('/apprenants');
+        const moi = apprenants.data.find(a => a.email === user?.email);
+        if (moi) {
+          const id = moi.codeUtilisateur;
+          const [s, m] = await Promise.all([
+            api.get(`/suivi-academique/apprenant/${id}`).then(res => res.data),
+            api.get(`/suivi-academique/apprenant/${id}/moyenne`).then(res => res.data)
+          ]);
+          setSuivis(s);
+          setMoyenne(m);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSuivi();
   }, [user]);
 
-  if (loading) return <div className="flex items-center justify-center h-64"><p className="text-gray-400">Chargement...</p></div>;
+  if (loading) return <div className="flex items-center justify-center h-64"><p className="text-slate-400">Chargement...</p></div>;
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-800 mb-6">Suivi académique</h1>
+      <h1 className="text-2xl font-semibold text-slate-800 mb-6">Suivi académique</h1>
 
-      {moyenne && moyenne.moyenneGenerale != null && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6">
-          <p className="text-sm text-gray-500">Moyenne générale</p>
-          <p className="text-3xl font-semibold text-gray-800">{moyenne.moyenneGenerale.toFixed(2)}/20</p>
-          <p className="text-xs text-gray-400 mt-1">{moyenne.nombreSuivis} évaluation(s)</p>
+      {moyenne !== null && (
+        <div className="bg-white rounded-xl border border-slate-200 p-5 mb-6 flex items-center gap-4">
+          <div>
+            <p className="text-sm text-slate-500">Moyenne générale</p>
+            <p className="text-3xl font-semibold text-emerald-600">{moyenne}/20</p>
+          </div>
         </div>
       )}
 
       {suivis.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-          <p className="text-gray-400">Aucun suivi académique.</p>
+        <div className="bg-white rounded-xl border border-dashed border-slate-200 p-8 text-center">
+          <p className="text-slate-400">Aucun suivi académique disponible.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-left text-gray-600">
-              <tr>
-                <th className="px-4 py-3">Semestre</th>
-                <th className="px-4 py-3">Moyenne</th>
-                <th className="px-4 py-3">Appréciation</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {suivis.map(s => (
-                <tr key={s.codeSuivi}>
-                  <td className="px-4 py-3 font-medium text-gray-800">{s.semestre}</td>
-                  <td className="px-4 py-3 text-gray-600">{s.moyenne != null ? `${s.moyenne}/20` : '-'}</td>
-                  <td className="px-4 py-3 text-gray-600">{s.appreciation || '-'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="space-y-3">
+          {suivis.map(s => (
+            <div key={s.codeSuivi || s.id} className="bg-white rounded-xl border border-slate-200 p-5">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-slate-800">Semestre {s.semestre}</p>
+                  <p className="text-xs text-slate-400 mt-0.5">{s.appreciation || 'Pas d\'appréciation'}</p>
+                </div>
+                {s.moyenne && (
+                  <span className="text-lg font-semibold text-emerald-600">{s.moyenne}/20</span>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
