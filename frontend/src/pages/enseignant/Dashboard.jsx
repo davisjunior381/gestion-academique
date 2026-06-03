@@ -12,15 +12,19 @@ export default function EnseignantDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [stages, rapports] = await Promise.all([
-          api.get('/stages').catch(() => ({ data: [] })),
-          api.get('/rapports').catch(() => ({ data: [] })),
-        ]);
-        setStats({
-          stages: stages.data.filter(s => s.encadrantId === user?.codeUtilisateur).length || stages.data.length,
-          rapports: rapports.data.length,
-          rapportsAEvaluer: rapports.data.filter(r => r.statut === 'DEPOSE').length,
-        });
+        const enseignants = await api.get('/enseignants');
+        const moi = enseignants.data.find(e => e.email === user?.email);
+        if (moi) {
+          const [stages, rapports] = await Promise.all([
+            api.get(`/stages/encadrant/${moi.codeUtilisateur}`).catch(() => ({ data: [] })),
+            api.get(`/rapports/evaluateur/${moi.codeUtilisateur}`).catch(() => ({ data: [] })),
+          ]);
+          setStats({
+            stages: stages.data.length,
+            rapports: rapports.data.length,
+            rapportsAEvaluer: rapports.data.filter(r => r.statut === 'DEPOSE').length,
+          });
+        }
       } catch (e) { console.error(e); }
       setLoading(false);
     };

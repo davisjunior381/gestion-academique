@@ -7,7 +7,7 @@ export default function Stages() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/stages')
+    api.get('/stages/me')
       .then(res => setStages(res.data))
       .catch(console.error)
       .finally(() => setLoading(false));

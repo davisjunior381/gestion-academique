@@ -1,17 +1,30 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import { ui, badgeClass, statutLabel, formatDateFR } from '../../components/common/ui';
 
 export default function StagesEncadres() {
+  const { user } = useAuth();
   const [stages, setStages] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/stages')
-      .then(res => setStages(res.data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+    const fetchStages = async () => {
+      try {
+        const enseignants = await api.get('/enseignants');
+        const moi = enseignants.data.find(e => e.email === user?.email);
+        if (moi) {
+          const res = await api.get(`/stages/encadrant/${moi.codeUtilisateur}`);
+          setStages(res.data);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStages();
+  }, [user]);
 
   if (loading) {
     return (
@@ -47,6 +60,7 @@ export default function StagesEncadres() {
               <tr>
                 <th className={ui.th}>Intitulé</th>
                 <th className={ui.th}>Apprenant</th>
+                <th className={ui.th}>Entreprise</th>
                 <th className={ui.th}>Période</th>
                 <th className={ui.th}>Statut</th>
               </tr>
@@ -61,6 +75,9 @@ export default function StagesEncadres() {
                     {stage.apprenantNom
                       ? `${stage.apprenantPrenom || ''} ${stage.apprenantNom}`.trim()
                       : <span className="italic text-ink-400">Non affecté</span>}
+                  </td>
+                  <td className={ui.td}>
+                    {stage.entrepriseNom || <span className="italic text-ink-400">-</span>}
                   </td>
                   <td className={`${ui.td} font-mono text-xs`}>
                     {formatDateFR(stage.dateDebut)} <span className="text-ink-300">-</span> {formatDateFR(stage.dateFin)}

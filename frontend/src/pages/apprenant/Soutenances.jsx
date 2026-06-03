@@ -1,17 +1,38 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 import { ui, badgeClass, statutLabel, formatDateTimeFR } from '../../components/common/ui';
 
 export default function Soutenances() {
+  const { user } = useAuth();
   const [soutenances, setSoutenances] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/soutenances')
-      .then(res => setSoutenances(res.data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+    const fetchSoutenances = async () => {
+      try {
+        const apprenants = await api.get('/apprenants');
+        const moi = apprenants.data.find(a => a.email === user?.email);
+        if (moi) {
+          const stages = await api.get('/stages/me');
+          const stageIds = Array.isArray(stages.data)
+            ? stages.data.map(s => s.refStage)
+            : stages.data ? [stages.data.refStage] : [];
+
+          const allSoutenances = await api.get('/soutenances');
+          const mesSoutenances = allSoutenances.data.filter(s =>
+            stageIds.includes(s.stageId || s.stage?.refStage)
+          );
+          setSoutenances(mesSoutenances);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSoutenances();
+  }, [user]);
 
   if (loading) {
     return (
@@ -43,7 +64,7 @@ export default function Soutenances() {
       ) : (
         <ul className="grid grid-cols-1 gap-5 md:grid-cols-2">
           {soutenances.map(s => (
-            <li key={s.refSoutenance}>
+            <li key={s.refSoutenance || s.id}>
               <article className="sygle-lift h-full rounded-sm border border-ink-200 bg-white p-6">
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -68,10 +89,22 @@ export default function Soutenances() {
                     <dt className="font-mono text-[10px] uppercase tracking-wider text-ink-400">Salle</dt>
                     <dd className="text-ink-900">{s.salle || 'À confirmer'}</dd>
                   </div>
+                  {s.duree && (
+                    <div className="flex items-baseline justify-between gap-3">
+                      <dt className="font-mono text-[10px] uppercase tracking-wider text-ink-400">Durée</dt>
+                      <dd className="text-ink-900">{s.duree} min</dd>
+                    </div>
+                  )}
                   {s.juryIntitule && (
                     <div className="flex items-baseline justify-between gap-3">
                       <dt className="font-mono text-[10px] uppercase tracking-wider text-ink-400">Jury</dt>
                       <dd className="text-right text-ink-900">{s.juryIntitule}</dd>
+                    </div>
+                  )}
+                  {s.note != null && (
+                    <div className="flex items-baseline justify-between gap-3">
+                      <dt className="font-mono text-[10px] uppercase tracking-wider text-ink-400">Note</dt>
+                      <dd className="font-display text-lg font-semibold text-success-700">{s.note}/20</dd>
                     </div>
                   )}
                 </dl>

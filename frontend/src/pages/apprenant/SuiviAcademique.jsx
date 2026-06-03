@@ -19,19 +19,26 @@ export default function SuiviAcademique() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user?.codeUtilisateur) {
-      setLoading(false);
-      return;
-    }
-    const id = user.codeUtilisateur;
-    Promise.all([
-      api.get(`/suivi-academique/apprenant/${id}`).then(res => res.data),
-      api.get(`/suivi-academique/apprenant/${id}/moyenne`).then(res => res.data)
-    ]).then(([s, m]) => {
-      setSuivis(s);
-      setMoyenne(m);
-    }).catch(console.error)
-      .finally(() => setLoading(false));
+    const fetchSuivi = async () => {
+      try {
+        const apprenants = await api.get('/apprenants');
+        const moi = apprenants.data.find(a => a.email === user?.email);
+        if (moi) {
+          const id = moi.codeUtilisateur;
+          const [s, m] = await Promise.all([
+            api.get(`/suivi-academique/apprenant/${id}`).then(res => res.data),
+            api.get(`/suivi-academique/apprenant/${id}/moyenne`).then(res => res.data)
+          ]);
+          setSuivis(s);
+          setMoyenne(m);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSuivi();
   }, [user]);
 
   if (loading) {
