@@ -10,21 +10,21 @@ export default function Soutenances() {
 
   useEffect(() => {
     const fetchSoutenances = async () => {
+      if (!user?.codeUtilisateur) {
+        setLoading(false);
+        return;
+      }
       try {
-        const apprenants = await api.get('/apprenants');
-        const moi = apprenants.data.find(a => a.email === user?.email);
-        if (moi) {
-          const stages = await api.get('/stages/me');
-          const stageIds = Array.isArray(stages.data)
-            ? stages.data.map(s => s.refStage)
-            : stages.data ? [stages.data.refStage] : [];
+        const stages = await api.get('/stages/me');
+        const stageIds = Array.isArray(stages.data)
+          ? stages.data.map(s => s.refStage)
+          : stages.data ? [stages.data.refStage] : [];
 
-          const allSoutenances = await api.get('/soutenances');
-          const mesSoutenances = allSoutenances.data.filter(s =>
-            stageIds.includes(s.stageId || s.stage?.refStage)
-          );
-          setSoutenances(mesSoutenances);
-        }
+        const allSoutenances = await api.get('/soutenances');
+        const mesSoutenances = allSoutenances.data.filter(s =>
+          stageIds.includes(s.stageId || s.stage?.refStage)
+        );
+        setSoutenances(mesSoutenances);
       } catch (err) {
         console.error(err);
       } finally {

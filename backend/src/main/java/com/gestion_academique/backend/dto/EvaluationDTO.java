@@ -15,6 +15,11 @@ public class EvaluationDTO {
 
     private String commentaire;
 
-    @NotNull(message = "L'id de l'évaluateur est obligatoire")
+    /**
+     * Optionnel et ignore par le controller : l'evaluateur est l'utilisateur
+     * authentifie (UserDetailsImpl) cote serveur. Conserve pour compatibilite
+     * avec les anciens clients et les tests unitaires qui appellent le service
+     * directement.
+     */
     private Long evaluateurId;
 }

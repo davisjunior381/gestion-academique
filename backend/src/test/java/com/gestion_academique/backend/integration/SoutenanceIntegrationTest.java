@@ -20,11 +20,15 @@ class SoutenanceIntegrationTest extends AbstractIntegrationTest {
         return persistStage(null, StatutStage.EN_COURS);
     }
 
+    // Date future stable utilisee dans tous les payloads (la contrainte @FutureOrPresent
+    // du DTO impose une date >= now).
+    private static final String FUTURE_DATE = "2099-06-01T10:00:00";
+
     @Test
     void create_validPayload_returns201AndPlanifiee() throws Exception {
         Stage stage = stageEnCours();
         String body = objectMapper.writeValueAsString(Map.of(
-                "date", "2026-06-01T10:00:00", "salle", "A101", "duree", 30,
+                "date", FUTURE_DATE, "salle", "A101", "duree", 30,
                 "stageId", stage.getRefStage()));
         mockMvc.perform(post("/api/soutenances").with(authAdmin())
                         .contentType(MediaType.APPLICATION_JSON).content(body))
@@ -38,7 +42,7 @@ class SoutenanceIntegrationTest extends AbstractIntegrationTest {
     void create_duplicateForStage_returns400() throws Exception {
         Stage stage = stageEnCours();
         String body = objectMapper.writeValueAsString(Map.of(
-                "date", "2026-06-01T10:00:00", "salle", "A101", "duree", 30,
+                "date", FUTURE_DATE, "salle", "A101", "duree", 30,
                 "stageId", stage.getRefStage()));
         mockMvc.perform(post("/api/soutenances").with(authAdmin())
                         .contentType(MediaType.APPLICATION_JSON).content(body))
@@ -62,7 +66,7 @@ class SoutenanceIntegrationTest extends AbstractIntegrationTest {
     @Test
     void create_missingStageId_returns400() throws Exception {
         String body = objectMapper.writeValueAsString(Map.of(
-                "date", "2026-06-01T10:00:00", "salle", "A101", "duree", 30));
+                "date", FUTURE_DATE, "salle", "A101", "duree", 30));
         mockMvc.perform(post("/api/soutenances").with(authAdmin())
                         .contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isBadRequest());
@@ -71,7 +75,7 @@ class SoutenanceIntegrationTest extends AbstractIntegrationTest {
     @Test
     void create_unknownStage_returns404() throws Exception {
         String body = objectMapper.writeValueAsString(Map.of(
-                "date", "2026-06-01T10:00:00", "salle", "A101", "duree", 30, "stageId", 99999));
+                "date", FUTURE_DATE, "salle", "A101", "duree", 30, "stageId", 99999));
         mockMvc.perform(post("/api/soutenances").with(authAdmin())
                         .contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isNotFound());
@@ -87,7 +91,7 @@ class SoutenanceIntegrationTest extends AbstractIntegrationTest {
     void delete_existing_returns204() throws Exception {
         Stage stage = stageEnCours();
         String body = objectMapper.writeValueAsString(Map.of(
-                "date", "2026-06-01T10:00:00", "salle", "A101", "duree", 30,
+                "date", FUTURE_DATE, "salle", "A101", "duree", 30,
                 "stageId", stage.getRefStage()));
         String response = mockMvc.perform(post("/api/soutenances").with(authAdmin())
                         .contentType(MediaType.APPLICATION_JSON).content(body))

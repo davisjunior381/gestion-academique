@@ -128,7 +128,7 @@ public class RapportStageService {
         return toResponseDTO(saved);
     }
 
-    public RapportResponseDTO evaluer(Long rapportId, EvaluationDTO dto) {
+    public RapportResponseDTO evaluer(Long rapportId, Long evaluateurId, EvaluationDTO dto) {
         RapportStage rapport = rapportRepository.findById(rapportId)
                 .orElseThrow(() -> new ResourceNotFoundException("Rapport non trouvé avec l'id: " + rapportId));
 
@@ -136,9 +136,10 @@ public class RapportStageService {
             throw new IllegalArgumentException("Le rapport doit être au statut DEPOSE pour être évalué");
         }
 
-        Enseignant evaluateur = entityManager.find(Enseignant.class, dto.getEvaluateurId());
+        // L'evaluateurId vient de l'utilisateur authentifie ; dto.getEvaluateurId() est ignore.
+        Enseignant evaluateur = entityManager.find(Enseignant.class, evaluateurId);
         if (evaluateur == null) {
-            throw new ResourceNotFoundException("Enseignant non trouvé avec l'id: " + dto.getEvaluateurId());
+            throw new ResourceNotFoundException("Enseignant non trouvé avec l'id: " + evaluateurId);
         }
 
         rapport.setNote(dto.getNote());
@@ -148,6 +149,16 @@ public class RapportStageService {
 
         RapportStage saved = rapportRepository.save(rapport);
         return toResponseDTO(saved);
+    }
+
+    /**
+     * @deprecated conserve pour compatibilite avec les tests qui appellent
+     * directement le service ; preferer la surcharge (rapportId, evaluateurId, dto)
+     * appelee depuis le controller avec l'utilisateur authentifie.
+     */
+    @Deprecated
+    public RapportResponseDTO evaluer(Long rapportId, EvaluationDTO dto) {
+        return evaluer(rapportId, dto.getEvaluateurId(), dto);
     }
 
     public RapportResponseDTO valider(Long rapportId) {

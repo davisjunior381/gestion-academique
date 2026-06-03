@@ -10,13 +10,14 @@ export default function StagesEncadres() {
 
   useEffect(() => {
     const fetchStages = async () => {
+      const id = user?.codeUtilisateur;
+      if (!id) {
+        setLoading(false);
+        return;
+      }
       try {
-        const enseignants = await api.get('/enseignants');
-        const moi = enseignants.data.find(e => e.email === user?.email);
-        if (moi) {
-          const res = await api.get(`/stages/encadrant/${moi.codeUtilisateur}`);
-          setStages(res.data);
-        }
+        const res = await api.get(`/stages/encadrant/${id}`);
+        setStages(res.data);
       } catch (err) {
         console.error(err);
       } finally {
