@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
+import { ui } from '../../components/common/ui';
 
 export default function EnseignantDashboard() {
   const { user } = useAuth();
@@ -30,32 +31,70 @@ export default function EnseignantDashboard() {
     fetchStats();
   }, [user]);
 
-  if (loading) return <p className="text-slate-400 p-6">Chargement...</p>;
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-400">Chargement...</p>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-slate-800">Bienvenue, {user?.prenom}</h1>
-        <p className="text-sm text-slate-500 mt-1">Voici un aperçu de votre activité.</p>
-      </div>
+      <header className="mb-10 border-b border-ink-200 pb-8">
+        <p className={ui.kicker}>Espace enseignant</p>
+        <h1 className="mt-2 font-display text-4xl font-medium tracking-tight text-ink-900">
+          Bonjour {user?.prenom},
+        </h1>
+        <p className="mt-3 max-w-2xl text-base text-ink-600">
+          Vos stages, vos rapports à noter et vos soutenances à venir, d'un coup d'œil.
+        </p>
+      </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <Link to="/enseignant/stages" className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-sm transition">
-          <p className="text-sm text-slate-500">Stages encadrés</p>
-          <p className="text-3xl font-semibold text-slate-800 mt-1">{stats.stages}</p>
+      <section className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+        <Link to="/enseignant/stages"
+          className="sygle-lift group rounded-sm border border-ink-200 bg-white p-6 transition hover:border-brand-400">
+          <p className="font-mono text-[11px] uppercase tracking-wider text-ink-500">
+            Stages encadrés
+          </p>
+          <p className="mt-2 font-display text-4xl font-medium tabular-nums tracking-tight text-ink-900">
+            {stats.stages}
+          </p>
+          <p className="mt-2 text-xs text-ink-500 transition group-hover:text-brand-700">
+            Voir mes stages -&gt;
+          </p>
         </Link>
-        <Link to="/enseignant/rapports" className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-sm transition">
-          <p className="text-sm text-slate-500">Rapports évalués</p>
-          <p className="text-3xl font-semibold text-slate-800 mt-1">{stats.rapports}</p>
+
+        <Link to="/enseignant/rapports"
+          className="sygle-lift group rounded-sm border border-ink-200 bg-white p-6 transition hover:border-brand-400">
+          <p className="font-mono text-[11px] uppercase tracking-wider text-ink-500">
+            Rapports en tout
+          </p>
+          <p className="mt-2 font-display text-4xl font-medium tabular-nums tracking-tight text-ink-900">
+            {stats.rapports}
+          </p>
+          <p className="mt-2 text-xs text-ink-500 transition group-hover:text-brand-700">
+            Tous les rapports déposés
+          </p>
         </Link>
-        <Link to="/enseignant/rapports" className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-sm transition">
-          <p className="text-sm text-slate-500">Rapports à évaluer</p>
-          <p className="text-3xl font-semibold text-amber-600 mt-1">{stats.rapportsAEvaluer}</p>
-          {stats.rapportsAEvaluer > 0 && (
-            <span className="inline-block mt-2 px-2 py-0.5 bg-amber-50 text-amber-700 rounded-md ring-1 ring-inset ring-amber-200 text-xs font-medium">Action requise</span>
+
+        <Link to="/enseignant/rapports"
+          className="sygle-lift group rounded-sm border border-accent-200 bg-white p-6 transition hover:border-accent-400">
+          <p className="font-mono text-[11px] uppercase tracking-wider text-accent-600">
+            À noter
+          </p>
+          <p className="mt-2 font-display text-4xl font-medium tabular-nums tracking-tight text-ink-900">
+            {stats.rapportsAEvaluer}
+          </p>
+          {stats.rapportsAEvaluer > 0 ? (
+            <p className="mt-2 inline-flex items-center rounded-sm bg-accent-50 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wider text-accent-700 ring-1 ring-inset ring-accent-200">
+              À faire
+            </p>
+          ) : (
+            <p className="mt-2 text-xs text-ink-500">Tout est à jour.</p>
           )}
         </Link>
-      </div>
+      </section>
     </div>
   );
 }

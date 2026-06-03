@@ -1,28 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
-
-const STATUT_LABELS = {
-  DEPOSE: 'Déposé',
-  EVALUE: 'Évalué',
-  VALIDE: 'Validé',
-  REJETE: 'Rejeté'
-};
-
-const STATUT_STYLES = {
-  DEPOSE: 'bg-slate-100 text-slate-700 ring-slate-200',
-  EVALUE: 'bg-amber-50 text-amber-700 ring-amber-200',
-  VALIDE: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
-  REJETE: 'bg-red-50 text-red-700 ring-red-200'
-};
-
-function StatutBadge({ statut }) {
-  const style = STATUT_STYLES[statut] || 'bg-slate-100 text-slate-600 ring-slate-200';
-  return (
-    <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${style}`}>
-      {STATUT_LABELS[statut] || statut}
-    </span>
-  );
-}
+import { ui, badgeClass, statutLabel, formatDateFR } from '../../components/common/ui';
 
 function DepotModal({ onClose, onSave }) {
   const [stageId, setStageId] = useState('');
@@ -45,26 +23,30 @@ function DepotModal({ onClose, onSave }) {
     onSave(stageId, formData)
       .then(() => onClose())
       .catch(() => {
-        setError('Le dépôt a échoué. Vérifiez que le fichier est bien un PDF, puis réessayez.');
+        setError('L\'envoi a échoué. Vérifiez que votre fichier est bien en PDF, puis réessayez.');
         setSubmitting(false);
       });
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-      <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white shadow-lg">
-        <div className="border-b border-slate-100 px-5 py-4">
-          <h2 className="text-base font-semibold text-slate-900">Déposer un rapport</h2>
-          <p className="mt-0.5 text-sm text-slate-500">Sélectionnez le stage concerné et joignez votre rapport au format PDF.</p>
+    <div className={ui.modalOverlay}>
+      <div className={ui.modalPanel}>
+        <div className={ui.modalHeader}>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent-600">
+            Nouvel envoi
+          </p>
+          <h2 className={ui.modalTitle}>Envoyer un rapport</h2>
+          <p className="mt-1 text-sm text-ink-500">
+            Choisissez votre stage puis ajoutez votre rapport en PDF.
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 px-5 py-4">
+        <form onSubmit={handleSubmit} className={ui.modalBody}>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Stage</label>
-            <select
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
-              value={stageId} onChange={e => setStageId(e.target.value)} required>
-              <option value="">Sélectionner un stage</option>
+            <label className={ui.label}>Stage concerné</label>
+            <select className={ui.input} required
+              value={stageId} onChange={e => setStageId(e.target.value)}>
+              <option value="">Choisir un stage</option>
               {stages.map(s => (
                 <option key={s.refStage} value={s.refStage}>{s.titre}</option>
               ))}
@@ -72,28 +54,26 @@ function DepotModal({ onClose, onSave }) {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Fichier PDF</label>
+            <label className={ui.label}>Fichier PDF</label>
             <input
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700 file:mr-3 file:rounded file:border-0 file:bg-slate-100 file:px-3 file:py-1 file:text-sm file:text-slate-700 hover:file:bg-slate-200 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+              className="w-full rounded-sm border border-ink-200 bg-white px-3 py-2 text-sm text-ink-700 transition file:mr-3 file:rounded-sm file:border-0 file:bg-ink-900 file:px-3 file:py-1 file:font-mono file:text-[11px] file:uppercase file:tracking-wider file:text-ink-50 hover:file:bg-ink-700 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
               type="file" accept=".pdf"
               onChange={e => setFichier(e.target.files[0])} required />
-            <p className="mt-1 text-xs text-slate-400">Format accepté : PDF uniquement.</p>
+            <p className="mt-1.5 text-xs text-ink-400">
+              PDF uniquement. Relisez bien avant d'envoyer : une fois déposé, vous ne pouvez plus le changer.
+            </p>
           </div>
 
           {error && (
-            <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div className="rounded-sm border border-danger-100 bg-danger-50 px-3 py-2 text-sm text-danger-700">
               {error}
             </div>
           )}
 
-          <div className="flex justify-end gap-2 pt-1">
-            <button type="button" onClick={onClose}
-              className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-              Annuler
-            </button>
-            <button type="submit" disabled={submitting}
-              className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50">
-              {submitting ? 'Dépôt en cours...' : 'Déposer le rapport'}
+          <div className={ui.modalFooter}>
+            <button type="button" onClick={onClose} className={ui.btnSecondary}>Annuler</button>
+            <button type="submit" disabled={submitting} className={ui.btnPrimary}>
+              {submitting ? 'Envoi en cours...' : 'Envoyer le rapport'}
             </button>
           </div>
         </form>
@@ -107,9 +87,7 @@ export default function Rapports() {
   const [loading, setLoading] = useState(true);
   const [showDepot, setShowDepot] = useState(false);
 
-  useEffect(() => {
-    loadRapports();
-  }, []);
+  useEffect(() => { loadRapports(); }, []);
 
   const loadRapports = () => {
     api.get('/rapports/me')
@@ -121,63 +99,99 @@ export default function Rapports() {
   const handleDeposer = (stageId, formData) => {
     return api.post(`/rapports/deposer/${stageId}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
-    }).then(() => {
-      loadRapports();
-    });
+    }).then(() => { loadRapports(); });
   };
 
   if (loading) {
-    return <div className="flex h-64 items-center justify-center text-sm text-slate-400">Chargement...</div>;
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-400">Chargement...</p>
+      </div>
+    );
   }
 
   return (
     <div>
-      <div className="mb-6 flex items-end justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900">Mes rapports</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {rapports.length} rapport{rapports.length > 1 ? 's' : ''} déposé{rapports.length > 1 ? 's' : ''}
-          </p>
+      <header className={ui.pageHeader}>
+        <div className="flex items-end justify-between gap-6">
+          <div>
+            <p className={ui.kicker}>Mes rapports</p>
+            <h1 className={ui.pageTitle}>Vos rapports</h1>
+            <p className={ui.pageLead}>
+              {rapports.length === 0
+                ? 'Vous n\'avez encore envoyé aucun rapport.'
+                : `${rapports.length} rapport${rapports.length > 1 ? 's' : ''} envoyé${rapports.length > 1 ? 's' : ''}. Les notes et commentaires de vos profs s'affichent ci-dessous.`}
+            </p>
+          </div>
+          <button onClick={() => setShowDepot(true)} className={ui.btnPrimary}>
+            Envoyer un rapport
+          </button>
         </div>
-        <button onClick={() => setShowDepot(true)}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
-          Déposer un rapport
-        </button>
-      </div>
+      </header>
 
       {rapports.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-          <p className="text-sm font-medium text-slate-700">Aucun rapport déposé</p>
-          <p className="mt-1 text-sm text-slate-500">Déposez le rapport de votre stage pour qu'il soit évalué.</p>
-          <button onClick={() => setShowDepot(true)}
-            className="mt-4 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
-            Déposer un rapport
+        <div className="rounded-sm border border-dashed border-ink-300 bg-white px-8 py-16 text-center">
+          <p className="font-display text-xl font-medium text-ink-800">
+            Pas encore de rapport envoyé.
+          </p>
+          <p className="mx-auto mt-3 max-w-md text-sm text-ink-500">
+            Quand votre stage est terminé, envoyez votre rapport en PDF.
+            Vos profs pourront le lire, le noter et le valider.
+          </p>
+          <button onClick={() => setShowDepot(true)} className={`${ui.btnPrimary} mt-6`}>
+            Envoyer mon rapport
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <ul className="space-y-4">
           {rapports.map(r => (
-            <div key={r.refRapport} className="rounded-lg border border-slate-200 bg-white p-5">
-              <div className="flex items-start justify-between gap-3">
-                <h3 className="text-sm font-semibold text-slate-900">{r.stageTitre || 'Rapport de stage'}</h3>
-                <StatutBadge statut={r.statut} />
-              </div>
-              <p className="mt-1 text-xs text-slate-500">Déposé le {r.dateDepot}</p>
+            <li key={r.refRapport} className="sygle-lift rounded-sm border border-ink-200 bg-white">
+              <article className="grid grid-cols-1 md:grid-cols-4">
+                <div className="border-b border-ink-100 px-6 py-5 md:col-span-3 md:border-b-0 md:border-r">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-mono text-[10px] uppercase tracking-wider text-ink-400">
+                        Réf. {r.refRapport}
+                      </p>
+                      <h3 className="mt-1 font-display text-xl font-medium tracking-tight text-ink-900">
+                        {r.stageTitre || 'Rapport de stage'}
+                      </h3>
+                      <p className="mt-1 text-xs text-ink-500">
+                        Envoyé le {formatDateFR(r.dateDepot)}
+                      </p>
+                    </div>
+                    <span className={badgeClass(r.statut)}>{statutLabel(r.statut)}</span>
+                  </div>
 
-              {(r.note != null || r.commentaire || r.evaluateurNom) && (
-                <div className="mt-3 border-t border-slate-100 pt-3">
-                  {r.note != null && (
-                    <p className="text-sm font-medium text-slate-900">Note : {r.note}/20</p>
-                  )}
-                  {r.commentaire && <p className="mt-1 text-sm text-slate-600">{r.commentaire}</p>}
-                  {r.evaluateurNom && (
-                    <p className="mt-1 text-xs text-slate-400">Évaluateur : {r.evaluateurNom} {r.evaluateurPrenom}</p>
+                  {r.commentaire && (
+                    <blockquote className="mt-4 border-l-2 border-accent-300 pl-4 text-sm italic text-ink-600">
+                      «&nbsp;{r.commentaire}&nbsp;»
+                    </blockquote>
                   )}
                 </div>
-              )}
-            </div>
+
+                <div className="px-6 py-5 md:py-5">
+                  <p className="font-mono text-[10px] uppercase tracking-wider text-ink-400">
+                    Note
+                  </p>
+                  {r.note != null ? (
+                    <p className="mt-1 font-display text-4xl font-medium tabular-nums tracking-tight text-ink-900">
+                      {r.note}<span className="text-base text-ink-400">/20</span>
+                    </p>
+                  ) : (
+                    <p className="mt-1 font-display text-xl italic text-ink-400">en attente</p>
+                  )}
+                  {r.evaluateurNom && (
+                    <p className="mt-3 text-xs text-ink-500">
+                      Noté par<br />
+                      <span className="text-ink-800">{r.evaluateurPrenom} {r.evaluateurNom}</span>
+                    </p>
+                  )}
+                </div>
+              </article>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
 
       {showDepot && <DepotModal onClose={() => setShowDepot(false)} onSave={handleDeposer} />}

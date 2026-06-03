@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
-
-const inputClass = 'w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400';
+import { ui } from '../../components/common/ui';
 
 function EnseignantModal({ enseignant, onClose, onSave }) {
   const [form, setForm] = useState({
@@ -29,38 +28,62 @@ function EnseignantModal({ enseignant, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-      <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white shadow-lg">
-        <div className="border-b border-slate-100 px-5 py-4">
-          <h2 className="text-base font-semibold text-slate-900">
-            {enseignant ? 'Modifier un enseignant' : 'Créer un enseignant'}
+    <div className={ui.modalOverlay}>
+      <div className={ui.modalPanel}>
+        <div className={ui.modalHeader}>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent-600">
+            {enseignant ? 'Édition' : 'Nouvel enseignant'}
+          </p>
+          <h2 className={ui.modalTitle}>
+            {enseignant ? `${enseignant.prenom} ${enseignant.nom}` : 'Ajouter un enseignant'}
           </h2>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-3 px-5 py-4">
-          <input className={inputClass} placeholder="Nom *"
-            value={form.nom} onChange={e => setForm({ ...form, nom: e.target.value })} required />
-          <input className={inputClass} placeholder="Prénom *"
-            value={form.prenom} onChange={e => setForm({ ...form, prenom: e.target.value })} required />
-          <input className={inputClass} placeholder="Email *" type="email"
-            value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
+        <form onSubmit={handleSubmit} className={ui.modalBody}>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={ui.label}>Nom</label>
+              <input className={ui.input} value={form.nom}
+                onChange={e => setForm({ ...form, nom: e.target.value })} required />
+            </div>
+            <div>
+              <label className={ui.label}>Prénom</label>
+              <input className={ui.input} value={form.prenom}
+                onChange={e => setForm({ ...form, prenom: e.target.value })} required />
+            </div>
+          </div>
+          <div>
+            <label className={ui.label}>Email</label>
+            <input className={ui.input} type="email" value={form.email}
+              onChange={e => setForm({ ...form, email: e.target.value })} required />
+          </div>
           {!enseignant && (
-            <input className={inputClass} placeholder="Mot de passe *" type="password"
-              value={form.motDePasse} onChange={e => setForm({ ...form, motDePasse: e.target.value })} required />
+            <div>
+              <label className={ui.label}>Mot de passe initial</label>
+              <input className={ui.input} type="password" value={form.motDePasse}
+                onChange={e => setForm({ ...form, motDePasse: e.target.value })} required />
+            </div>
           )}
-          <input className={inputClass} placeholder="Grade"
-            value={form.grade} onChange={e => setForm({ ...form, grade: e.target.value })} />
-          <input className={inputClass} placeholder="Spécialité"
-            value={form.specialite} onChange={e => setForm({ ...form, specialite: e.target.value })} />
-          <input className={inputClass} placeholder="Département"
-            value={form.departement} onChange={e => setForm({ ...form, departement: e.target.value })} />
-          <div className="flex justify-end gap-2 pt-1">
-            <button type="button" onClick={onClose}
-              className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-              Annuler
-            </button>
-            <button type="submit"
-              className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
-              {enseignant ? 'Enregistrer' : 'Créer'}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={ui.label}>Grade</label>
+              <input className={ui.input} placeholder="Maître de conférences" value={form.grade}
+                onChange={e => setForm({ ...form, grade: e.target.value })} />
+            </div>
+            <div>
+              <label className={ui.label}>Département</label>
+              <input className={ui.input} placeholder="Informatique" value={form.departement}
+                onChange={e => setForm({ ...form, departement: e.target.value })} />
+            </div>
+          </div>
+          <div>
+            <label className={ui.label}>Spécialité</label>
+            <input className={ui.input} placeholder="Systèmes embarqués, IA, réseaux..." value={form.specialite}
+              onChange={e => setForm({ ...form, specialite: e.target.value })} />
+          </div>
+          <div className={ui.modalFooter}>
+            <button type="button" onClick={onClose} className={ui.btnSecondary}>Annuler</button>
+            <button type="submit" className={ui.btnPrimary}>
+              {enseignant ? 'Enregistrer' : 'Créer l\'enseignant'}
             </button>
           </div>
         </form>
@@ -99,31 +122,38 @@ function ModulesSection({ enseignantId }) {
   const availableModules = allModules.filter(m => !modules.some(am => am.codeModule === m.codeModule));
 
   return (
-    <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 p-3">
-      <p className="mb-2 text-xs font-medium text-slate-600">Modules affectés</p>
+    <div className="mt-3 rounded-sm border border-ink-200 bg-ink-50/60 p-4">
+      <p className="font-mono text-[10px] uppercase tracking-wider text-ink-500">
+        Modules enseignés
+      </p>
       {modules.length === 0 ? (
-        <p className="text-xs text-slate-400">Aucun module</p>
+        <p className="mt-2 text-xs italic text-ink-400">Aucun module affecté pour l'instant.</p>
       ) : (
-        <div className="mb-2 flex flex-wrap gap-1">
+        <ul className="mt-2 flex flex-wrap gap-1.5">
           {modules.map(m => (
-            <span key={m.codeModule} className="inline-flex items-center gap-1 rounded-md bg-white px-2 py-1 text-xs text-slate-700 ring-1 ring-inset ring-slate-200">
-              {m.nom}
-              <button onClick={() => retirer(m.codeModule)} className="text-slate-400 hover:text-red-600">&times;</button>
-            </span>
+            <li key={m.codeModule}
+              className="inline-flex items-center gap-1.5 rounded-sm bg-white px-2 py-1 text-xs text-ink-700 ring-1 ring-inset ring-ink-200">
+              <span>{m.nom}</span>
+              <button onClick={() => retirer(m.codeModule)}
+                className="text-ink-400 transition hover:text-accent-600" aria-label="Retirer">
+                &times;
+              </button>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
       {availableModules.length > 0 && (
-        <div className="mt-2 flex gap-2">
-          <select className="flex-1 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+        <div className="mt-3 flex gap-2">
+          <select className="flex-1 rounded-sm border border-ink-200 bg-white px-2 py-1 text-xs text-ink-900 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
             value={selectedModuleId} onChange={e => setSelectedModuleId(e.target.value)}>
-            <option value="">Ajouter un module...</option>
+            <option value="">Affecter un module...</option>
             {availableModules.map(m => (
               <option key={m.codeModule} value={m.codeModule}>{m.nom}</option>
             ))}
           </select>
-          <button onClick={affecter} className="rounded-md bg-slate-900 px-3 py-1 text-xs font-medium text-white hover:bg-slate-800">
-            Ajouter
+          <button onClick={affecter}
+            className="rounded-sm bg-brand-700 px-3 py-1 text-xs font-medium text-ink-50 transition hover:bg-brand-800">
+            Affecter
           </button>
         </div>
       )}
@@ -139,9 +169,7 @@ export default function Enseignants() {
   const [expandedId, setExpandedId] = useState(null);
   const [search, setSearch] = useState('');
 
-  useEffect(() => {
-    loadEnseignants();
-  }, []);
+  useEffect(() => { loadEnseignants(); }, []);
 
   const loadEnseignants = () => {
     api.get('/enseignants')
@@ -153,11 +181,9 @@ export default function Enseignants() {
   const handleSave = (form) => {
     const payload = { ...form };
     if (!payload.motDePasse) delete payload.motDePasse;
-
     const request = editing
       ? api.put(`/enseignants/${editing.codeUtilisateur}`, payload)
       : api.post('/enseignants', payload);
-
     request.then(() => {
       loadEnseignants();
       setShowModal(false);
@@ -166,10 +192,8 @@ export default function Enseignants() {
   };
 
   const handleDelete = (id) => {
-    if (!window.confirm('Supprimer cet enseignant ?')) return;
-    api.delete(`/enseignants/${id}`)
-      .then(() => loadEnseignants())
-      .catch(console.error);
+    if (!window.confirm('Confirmer la suppression de cet enseignant ?')) return;
+    api.delete(`/enseignants/${id}`).then(() => loadEnseignants()).catch(console.error);
   };
 
   const filtered = enseignants.filter(e =>
@@ -177,63 +201,76 @@ export default function Enseignants() {
   );
 
   if (loading) {
-    return <div className="flex h-64 items-center justify-center text-sm text-slate-400">Chargement...</div>;
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-400">Chargement...</p>
+      </div>
+    );
   }
 
   return (
     <div>
-      <div className="mb-6 flex items-end justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900">Enseignants</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {enseignants.length} enseignant{enseignants.length > 1 ? 's' : ''}
-          </p>
+      <header className={ui.pageHeader}>
+        <div className="flex items-end justify-between gap-6">
+          <div>
+            <p className={ui.kicker}>Liste des profs</p>
+            <h1 className={ui.pageTitle}>Enseignants</h1>
+            <p className={ui.pageLead}>
+              {enseignants.length} enseignant{enseignants.length > 1 ? 's' : ''}.
+              Cliquez sur un nom pour voir ses modules.
+            </p>
+          </div>
+          <button onClick={() => { setEditing(null); setShowModal(true); }} className={ui.btnPrimary}>
+            Ajouter un enseignant
+          </button>
         </div>
-        <button onClick={() => { setEditing(null); setShowModal(true); }}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
-          Créer un enseignant
-        </button>
+      </header>
+
+      <div className="mb-4 max-w-md">
+        <input className={ui.input} placeholder="Rechercher par nom, email, spécialité..."
+          value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
-      <input className={`${inputClass} mb-4`} placeholder="Rechercher un enseignant..."
-        value={search} onChange={e => setSearch(e.target.value)} />
-
-      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-        <table className="w-full text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-left text-slate-600">
+      <div className={ui.tableWrap}>
+        <table className={ui.table}>
+          <thead className={ui.thead}>
             <tr>
-              <th className="px-4 py-3 font-medium">Nom</th>
-              <th className="px-4 py-3 font-medium">Email</th>
-              <th className="px-4 py-3 font-medium">Grade</th>
-              <th className="px-4 py-3 font-medium">Spécialité</th>
-              <th className="px-4 py-3 text-right font-medium">Actions</th>
+              <th className={ui.th}>Identité</th>
+              <th className={ui.th}>Email</th>
+              <th className={ui.th}>Grade</th>
+              <th className={ui.th}>Spécialité</th>
+              <th className={`${ui.th} text-right`}>Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className={ui.tbody}>
             {filtered.map(e => (
-              <tr key={e.codeUtilisateur} className="hover:bg-slate-50">
+              <tr key={e.codeUtilisateur} className={ui.tr}>
                 <td className="px-4 py-3 align-top">
                   <button onClick={() => setExpandedId(expandedId === e.codeUtilisateur ? null : e.codeUtilisateur)}
-                    className="font-medium text-slate-900 hover:underline">
-                    {e.nom} {e.prenom}
+                    className="font-display text-base font-medium text-ink-900 hover:text-brand-700 hover:underline decoration-1 underline-offset-4">
+                    {e.prenom} {e.nom}
                   </button>
                   {expandedId === e.codeUtilisateur && <ModulesSection enseignantId={e.codeUtilisateur} />}
                 </td>
-                <td className="px-4 py-3 align-top text-slate-600">{e.email}</td>
-                <td className="px-4 py-3 align-top text-slate-600">{e.grade || '-'}</td>
-                <td className="px-4 py-3 align-top text-slate-600">{e.specialite || '-'}</td>
+                <td className={`${ui.td} align-top`}>{e.email}</td>
+                <td className={`${ui.td} align-top`}>{e.grade || '-'}</td>
+                <td className={`${ui.td} align-top`}>{e.specialite || '-'}</td>
                 <td className="px-4 py-3 align-top">
                   <div className="flex justify-end gap-3">
                     <button onClick={() => { setEditing(e); setShowModal(true); }}
-                      className="text-sm font-medium text-slate-700 hover:text-slate-900">Modifier</button>
+                      className="text-sm text-ink-600 transition hover:text-brand-700">Éditer</button>
                     <button onClick={() => handleDelete(e.codeUtilisateur)}
-                      className="text-sm font-medium text-red-600 hover:text-red-700">Supprimer</button>
+                      className="text-sm text-accent-600 transition hover:text-accent-700">Supprimer</button>
                   </div>
                 </td>
               </tr>
             ))}
             {filtered.length === 0 && (
-              <tr><td colSpan="5" className="px-4 py-10 text-center text-slate-400">Aucun enseignant</td></tr>
+              <tr>
+                <td colSpan="5" className="px-4 py-12 text-center text-sm text-ink-500">
+                  Aucun enseignant ne correspond à votre recherche.
+                </td>
+              </tr>
             )}
           </tbody>
         </table>

@@ -1,28 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
-
-const STATUT_LABELS = {
-  DEPOSE: 'Déposé',
-  EVALUE: 'Évalué',
-  VALIDE: 'Validé',
-  REJETE: 'Rejeté',
-};
-
-const STATUT_STYLES = {
-  DEPOSE: 'bg-slate-100 text-slate-700 ring-slate-200',
-  EVALUE: 'bg-amber-50 text-amber-700 ring-amber-200',
-  VALIDE: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
-  REJETE: 'bg-red-50 text-red-700 ring-red-200',
-};
-
-function StatutBadge({ statut }) {
-  const style = STATUT_STYLES[statut] || 'bg-slate-100 text-slate-600 ring-slate-200';
-  return (
-    <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${style}`}>
-      {STATUT_LABELS[statut] || statut}
-    </span>
-  );
-}
+import { ui, badgeClass, statutLabel, formatDateFR } from '../../components/common/ui';
 
 export default function Rapports() {
   const [rapports, setRapports] = useState([]);
@@ -31,6 +9,7 @@ export default function Rapports() {
   const [note, setNote] = useState('');
   const [commentaire, setCommentaire] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const fetchRapports = () => {
     api.get('/rapports')
@@ -43,6 +22,7 @@ export default function Rapports() {
 
   const handleEvaluer = async (rapportId) => {
     setSubmitting(true);
+    setError('');
     try {
       await api.post(`/rapports/${rapportId}/evaluer`, {
         note: parseFloat(note),
@@ -54,7 +34,7 @@ export default function Rapports() {
       setCommentaire('');
       fetchRapports();
     } catch (err) {
-      alert('Erreur lors de l\'évaluation');
+      setError('La note n\'a pas pu être enregistrée. Réessayez dans un instant.');
     }
     setSubmitting(false);
   };
@@ -63,120 +43,153 @@ export default function Rapports() {
     try {
       await api.patch(`/rapports/${rapportId}/valider`);
       fetchRapports();
-    } catch (err) { alert('Erreur'); }
+    } catch (err) { alert('Action impossible'); }
   };
 
   const handleRejeter = async (rapportId) => {
     try {
       await api.patch(`/rapports/${rapportId}/rejeter`);
       fetchRapports();
-    } catch (err) { alert('Erreur'); }
+    } catch (err) { alert('Action impossible'); }
   };
 
-  if (loading) return <div className="flex h-64 items-center justify-center text-sm text-slate-400">Chargement...</div>;
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-400">Chargement...</p>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <h1 className="mb-6 text-xl font-semibold text-slate-900">Rapports de stage</h1>
+      <header className={ui.pageHeader}>
+        <p className={ui.kicker}>Notation des rapports</p>
+        <h1 className={ui.pageTitle}>Rapports à noter</h1>
+        <p className={ui.pageLead}>
+          Mettez une note, laissez un commentaire, puis validez le rapport
+          ou demandez à l'élève de le retravailler.
+        </p>
+      </header>
 
       {rapports.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-          <p className="text-sm text-slate-500">Aucun rapport déposé.</p>
+        <div className="rounded-sm border border-dashed border-ink-300 bg-white px-8 py-16 text-center">
+          <p className="font-display text-xl font-medium text-ink-800">
+            Aucun rapport à noter pour l'instant.
+          </p>
+          <p className="mx-auto mt-3 max-w-md text-sm text-ink-500">
+            Les rapports s'afficheront ici dès qu'un élève en aura déposé un.
+          </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <ul className="space-y-4">
           {rapports.map(rapport => (
-            <div key={rapport.refRapport} className="rounded-lg border border-slate-200 bg-white p-5">
-              <div className="mb-3 flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-900">{rapport.stageTitre}</h3>
-                  <p className="mt-0.5 text-xs text-slate-500">Déposé le {rapport.dateDepot}</p>
+            <li key={rapport.refRapport}>
+              <article className="sygle-lift rounded-sm border border-ink-200 bg-white p-6">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-wider text-ink-400">
+                      Réf. {rapport.refRapport}
+                    </p>
+                    <h3 className="mt-1 font-display text-xl font-medium tracking-tight text-ink-900">
+                      {rapport.stageTitre}
+                    </h3>
+                    <p className="mt-1 text-xs text-ink-500">
+                      Déposé le {formatDateFR(rapport.dateDepot)}
+                    </p>
+                  </div>
+                  <span className={badgeClass(rapport.statut)}>{statutLabel(rapport.statut)}</span>
                 </div>
-                <StatutBadge statut={rapport.statut} />
-              </div>
 
-              {rapport.note !== null && (
-                <div className="mb-3 rounded-md border border-slate-100 bg-slate-50 p-3">
-                  <div className="flex items-center gap-4">
+                {rapport.note !== null && rapport.note !== undefined && (
+                  <div className="mt-4 grid grid-cols-1 gap-4 rounded-sm border border-ink-100 bg-ink-50 p-4 md:grid-cols-4">
                     <div>
-                      <p className="text-xs text-slate-500">Note</p>
-                      <p className="text-lg font-semibold text-slate-900">{rapport.note}/20</p>
+                      <p className="font-mono text-[10px] uppercase tracking-wider text-ink-500">Note</p>
+                      <p className="mt-1 font-display text-3xl font-medium tabular-nums text-ink-900">
+                        {rapport.note}<span className="text-base text-ink-400">/20</span>
+                      </p>
                     </div>
                     {rapport.commentaire && (
-                      <div className="flex-1">
-                        <p className="text-xs text-slate-500">Commentaire</p>
-                        <p className="text-sm text-slate-600">{rapport.commentaire}</p>
+                      <div className="md:col-span-3">
+                        <p className="font-mono text-[10px] uppercase tracking-wider text-ink-500">
+                          Commentaire
+                        </p>
+                        <p className="mt-1 text-sm italic text-ink-700">
+                          «&nbsp;{rapport.commentaire}&nbsp;»
+                        </p>
                       </div>
                     )}
                   </div>
-                </div>
-              )}
+                )}
 
-              <div className="flex gap-2">
-                {rapport.statut === 'DEPOSE' && (
-                  <button
-                    onClick={() => setEvalModal(rapport.refRapport)}
-                    className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800"
-                  >
-                    Évaluer
-                  </button>
-                )}
-                {rapport.statut === 'EVALUE' && (
-                  <>
+                <div className="mt-5 flex flex-wrap gap-2 border-t border-ink-100 pt-4">
+                  {rapport.statut === 'DEPOSE' && (
                     <button
-                      onClick={() => handleValider(rapport.refRapport)}
-                      className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700"
-                    >
-                      Valider
+                      onClick={() => setEvalModal(rapport.refRapport)}
+                      className={ui.btnPrimary}>
+                      Noter ce rapport
                     </button>
-                    <button
-                      onClick={() => handleRejeter(rapport.refRapport)}
-                      className="rounded-md border border-red-200 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50"
-                    >
-                      Rejeter
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
+                  )}
+                  {rapport.statut === 'EVALUE' && (
+                    <>
+                      <button onClick={() => handleValider(rapport.refRapport)}
+                        className="inline-flex items-center justify-center rounded-sm bg-success-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-success-700">
+                        Valider
+                      </button>
+                      <button onClick={() => handleRejeter(rapport.refRapport)}
+                        className="inline-flex items-center justify-center rounded-sm border border-accent-200 px-4 py-2 text-sm font-medium text-accent-600 transition hover:bg-accent-50">
+                        Demander à refaire
+                      </button>
+                    </>
+                  )}
+                </div>
+              </article>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
 
       {evalModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-          <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white shadow-lg">
-            <div className="border-b border-slate-100 px-5 py-4">
-              <h2 className="text-base font-semibold text-slate-900">Évaluer le rapport</h2>
+        <div className={ui.modalOverlay}>
+          <div className={ui.modalPanel}>
+            <div className={ui.modalHeader}>
+              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent-600">
+                Notation
+              </p>
+              <h2 className={ui.modalTitle}>Noter le rapport</h2>
             </div>
-            <div className="space-y-4 px-5 py-4">
+            <div className={ui.modalBody}>
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">Note (sur 20)</label>
+                <label className={ui.label}>Note sur 20</label>
                 <input
                   type="number" min="0" max="20" step="0.5" value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
-                  placeholder="15.5"
+                  className={ui.input}
+                  placeholder="15,5"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">Commentaire</label>
+                <label className={ui.label}>Commentaire</label>
                 <textarea
                   value={commentaire} onChange={(e) => setCommentaire(e.target.value)}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
-                  rows={3} placeholder="Bon travail, quelques points à améliorer..."
+                  className={ui.input}
+                  rows={4} placeholder="Ce qui est bien, ce qui peut être amélioré..."
                 />
               </div>
-              <div className="flex justify-end gap-2">
-                <button onClick={() => setEvalModal(null)}
-                  className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-                  Annuler
-                </button>
-                <button onClick={() => handleEvaluer(evalModal)} disabled={!note || submitting}
-                  className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50">
-                  {submitting ? 'Envoi...' : 'Envoyer l\'évaluation'}
-                </button>
-              </div>
+              {error && (
+                <div className="rounded-sm border border-danger-100 bg-danger-50 px-3 py-2 text-sm text-danger-700">
+                  {error}
+                </div>
+              )}
+            </div>
+            <div className={ui.modalFooter}>
+              <button onClick={() => { setEvalModal(null); setError(''); }} className={ui.btnSecondary}>
+                Annuler
+              </button>
+              <button onClick={() => handleEvaluer(evalModal)} disabled={!note || submitting}
+                className={ui.btnPrimary}>
+                {submitting ? 'Envoi...' : 'Enregistrer la note'}
+              </button>
             </div>
           </div>
         </div>
