@@ -3,6 +3,39 @@
  * Classes pretes a composer pour eviter la divergence entre pages.
  */
 
+import api from '../../services/api';
+
+/**
+ * Ouvre le PDF d'un rapport dans un nouvel onglet.
+ * Recupere le fichier en blob authentifie (le JWT est ajoute par l'intercepteur axios),
+ * cree un objectURL et l'ouvre.
+ * Renvoie une promesse qui resout en true si l'ouverture a reussi, false sinon.
+ */
+export async function ouvrirRapportPDF(rapportId) {
+  try {
+    const response = await api.get(`/rapports/${rapportId}/fichier`, {
+      responseType: 'blob',
+    });
+    const blobUrl = URL.createObjectURL(response.data);
+    const opened = window.open(blobUrl, '_blank', 'noopener,noreferrer');
+    if (!opened) {
+      // Popup bloque : on declenche un telechargement comme repli
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `rapport-${rapportId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+    // Liberer l'objectURL un peu plus tard pour laisser le navigateur l'ouvrir
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+    return true;
+  } catch (err) {
+    console.error('Echec de la consultation du rapport', err);
+    return false;
+  }
+}
+
 export const ui = {
   // Boutons
   btnPrimary:
