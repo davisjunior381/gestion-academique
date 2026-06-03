@@ -35,25 +35,41 @@ function SoutenanceModal({ soutenance, onClose, onSave }) {
     });
   };
 
+  const inputClass = 'w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400';
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md">
-        <h2 className="text-lg font-semibold mb-4">
-          {soutenance ? 'Modifier' : 'Planifier'} une soutenance
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-3">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+      <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white shadow-lg">
+        <div className="border-b border-slate-100 px-5 py-4">
+          <h2 className="text-base font-semibold text-slate-900">
+            {soutenance ? 'Modifier la soutenance' : 'Planifier une soutenance'}
+          </h2>
+          <p className="mt-0.5 text-sm text-slate-500">Renseignez la date, le stage concerné et, si besoin, le jury.</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4 px-5 py-4">
           <div>
-            <label className="text-xs text-gray-500">Date et heure *</label>
-            <input className="w-full border rounded-lg px-3 py-2 text-sm" type="datetime-local"
+            <label className="mb-1 block text-sm font-medium text-slate-700">Date et heure</label>
+            <input className={inputClass} type="datetime-local"
               value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} required />
           </div>
-          <input className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Salle"
-            value={form.salle} onChange={e => setForm({ ...form, salle: e.target.value })} />
-          <input className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Durée (min)" type="number"
-            value={form.duree} onChange={e => setForm({ ...form, duree: e.target.value })} />
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Salle</label>
+              <input className={inputClass} placeholder="Ex. Amphi A"
+                value={form.salle} onChange={e => setForm({ ...form, salle: e.target.value })} />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Durée (min)</label>
+              <input className={inputClass} type="number"
+                value={form.duree} onChange={e => setForm({ ...form, duree: e.target.value })} />
+            </div>
+          </div>
+
           <div>
-            <label className="text-xs text-gray-500">Stage *</label>
-            <select className="w-full border rounded-lg px-3 py-2 text-sm"
+            <label className="mb-1 block text-sm font-medium text-slate-700">Stage</label>
+            <select className={inputClass}
               value={form.stageId} onChange={e => setForm({ ...form, stageId: e.target.value })} required>
               <option value="">Sélectionner un stage</option>
               {stages.map(s => (
@@ -61,9 +77,10 @@ function SoutenanceModal({ soutenance, onClose, onSave }) {
               ))}
             </select>
           </div>
+
           <div>
-            <label className="text-xs text-gray-500">Jury</label>
-            <select className="w-full border rounded-lg px-3 py-2 text-sm"
+            <label className="mb-1 block text-sm font-medium text-slate-700">Jury</label>
+            <select className={inputClass}
               value={form.juryId} onChange={e => setForm({ ...form, juryId: e.target.value })}>
               <option value="">Aucun jury</option>
               {jurys.map(j => (
@@ -71,12 +88,15 @@ function SoutenanceModal({ soutenance, onClose, onSave }) {
               ))}
             </select>
           </div>
-          <div className="flex gap-2 pt-2">
-            <button type="submit" className="flex-1 bg-blue-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-blue-700">
-              {soutenance ? 'Modifier' : 'Planifier'}
-            </button>
-            <button type="button" onClick={onClose} className="flex-1 border rounded-lg py-2 text-sm font-medium hover:bg-gray-50">
+
+          <div className="flex justify-end gap-2 pt-1">
+            <button type="button" onClick={onClose}
+              className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
               Annuler
+            </button>
+            <button type="submit"
+              className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
+              {soutenance ? 'Enregistrer' : 'Planifier'}
             </button>
           </div>
         </form>
@@ -128,58 +148,60 @@ export default function Soutenances() {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><p className="text-gray-400">Chargement...</p></div>;
+    return <div className="flex h-64 items-center justify-center text-sm text-slate-400">Chargement...</div>;
   }
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800">Soutenances</h1>
-          <p className="text-sm text-gray-500 mt-1">{soutenances.length} soutenance(s)</p>
+          <h1 className="text-xl font-semibold text-slate-900">Soutenances</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            {soutenances.length} soutenance{soutenances.length > 1 ? 's' : ''} planifiée{soutenances.length > 1 ? 's' : ''}
+          </p>
         </div>
         <button onClick={() => { setEditing(null); setShowModal(true); }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
-          + Planifier
+          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
+          Planifier une soutenance
         </button>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left text-gray-600">
+          <thead className="border-b border-slate-200 bg-slate-50 text-left text-slate-600">
             <tr>
-              <th className="px-4 py-3">Date</th>
-              <th className="px-4 py-3">Salle</th>
-              <th className="px-4 py-3">Stage</th>
-              <th className="px-4 py-3">Jury</th>
-              <th className="px-4 py-3">Statut</th>
-              <th className="px-4 py-3">Actions</th>
+              <th className="px-4 py-3 font-medium">Date</th>
+              <th className="px-4 py-3 font-medium">Salle</th>
+              <th className="px-4 py-3 font-medium">Stage</th>
+              <th className="px-4 py-3 font-medium">Jury</th>
+              <th className="px-4 py-3 font-medium">Statut</th>
+              <th className="px-4 py-3 text-right font-medium">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-slate-100">
             {soutenances.map(s => (
-              <tr key={s.refSoutenance}>
-                <td className="px-4 py-3">{formatDate(s.date)}</td>
-                <td className="px-4 py-3 text-gray-600">{s.salle || '-'}</td>
-                <td className="px-4 py-3 text-gray-600">{s.stageTitre || '-'}</td>
-                <td className="px-4 py-3 text-gray-600">{s.juryIntitule || 'Non assigné'}</td>
+              <tr key={s.refSoutenance} className="hover:bg-slate-50">
+                <td className="px-4 py-3 text-slate-900">{formatDate(s.date)}</td>
+                <td className="px-4 py-3 text-slate-600">{s.salle || '-'}</td>
+                <td className="px-4 py-3 text-slate-600">{s.stageTitre || '-'}</td>
+                <td className="px-4 py-3 text-slate-600">{s.juryIntitule || 'Non assigné'}</td>
                 <td className="px-4 py-3">
-                  <span className="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full">
+                  <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-200">
                     {s.statut || 'PLANIFIEE'}
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex gap-2">
+                  <div className="flex justify-end gap-3">
                     <button onClick={() => { setEditing(s); setShowModal(true); }}
-                      className="text-blue-600 hover:text-blue-800 text-xs">Modifier</button>
+                      className="text-sm font-medium text-slate-700 hover:text-slate-900">Modifier</button>
                     <button onClick={() => handleDelete(s.refSoutenance)}
-                      className="text-red-600 hover:text-red-800 text-xs">Supprimer</button>
+                      className="text-sm font-medium text-red-600 hover:text-red-700">Supprimer</button>
                   </div>
                 </td>
               </tr>
             ))}
             {soutenances.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">Aucune soutenance</td></tr>
+              <tr><td colSpan={6} className="px-4 py-10 text-center text-slate-400">Aucune soutenance planifiée</td></tr>
             )}
           </tbody>
         </table>
