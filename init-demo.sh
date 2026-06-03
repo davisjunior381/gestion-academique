@@ -60,26 +60,65 @@ ok "Admin : admin@eseo.fr / Admin2026!"
 # Enseignants
 R=$(curl -s -X POST "$BASE/auth/register" -H "Content-Type: application/json" \
   -d '{"nom":"Dupont","prenom":"Jean","email":"jean.dupont@eseo.fr","motDePasse":"Enseignant2026!","roleNom":"ENSEIGNANT"}')
-ENS1_EMAIL="jean.dupont@eseo.fr"
-ok "Enseignant 1 : jean.dupont@eseo.fr / Enseignant2026!"
+ok "Enseignant 1 : jean.dupont@eseo.fr"
 
 R=$(curl -s -X POST "$BASE/auth/register" -H "Content-Type: application/json" \
   -d '{"nom":"Martin","prenom":"Sophie","email":"sophie.martin@eseo.fr","motDePasse":"Enseignant2026!","roleNom":"ENSEIGNANT"}')
-ENS2_EMAIL="sophie.martin@eseo.fr"
-ok "Enseignant 2 : sophie.martin@eseo.fr / Enseignant2026!"
+ok "Enseignant 2 : sophie.martin@eseo.fr"
+
+R=$(curl -s -X POST "$BASE/auth/register" -H "Content-Type: application/json" \
+  -d '{"nom":"Margon","prenom":"Bernard","email":"bernard.margon@eseo.fr","motDePasse":"Enseignant2026!","roleNom":"ENSEIGNANT"}')
+ok "Enseignant 3 : bernard.margon@eseo.fr"
+
+R=$(curl -s -X POST "$BASE/auth/register" -H "Content-Type: application/json" \
+  -d '{"nom":"Thomas","prenom":"Philimon","email":"philimon.thomas@eseo.fr","motDePasse":"Enseignant2026!","roleNom":"ENSEIGNANT"}')
+ok "Enseignant 4 : philimon.thomas@eseo.fr"
+
+R=$(curl -s -X POST "$BASE/auth/register" -H "Content-Type: application/json" \
+  -d '{"nom":"Donald","prenom":"Claude","email":"claude.donald@eseo.fr","motDePasse":"Enseignant2026!","roleNom":"ENSEIGNANT"}')
+ok "Enseignant 5 : claude.donald@eseo.fr"
 
 # Apprenants
 R=$(curl -s -X POST "$BASE/auth/register" -H "Content-Type: application/json" \
   -d '{"nom":"Dubois","prenom":"Alice","email":"alice.dubois@eseo.fr","motDePasse":"Apprenant2026!","roleNom":"APPRENANT"}')
-ok "Apprenant 1 : alice.dubois@eseo.fr / Apprenant2026!"
+ok "Apprenant 1 : alice.dubois@eseo.fr"
 
 R=$(curl -s -X POST "$BASE/auth/register" -H "Content-Type: application/json" \
   -d '{"nom":"Bernard","prenom":"Lucas","email":"lucas.bernard@eseo.fr","motDePasse":"Apprenant2026!","roleNom":"APPRENANT"}')
-ok "Apprenant 2 : lucas.bernard@eseo.fr / Apprenant2026!"
+ok "Apprenant 2 : lucas.bernard@eseo.fr"
 
 R=$(curl -s -X POST "$BASE/auth/register" -H "Content-Type: application/json" \
   -d '{"nom":"Moreau","prenom":"Emma","email":"emma.moreau@eseo.fr","motDePasse":"Apprenant2026!","roleNom":"APPRENANT"}')
-ok "Apprenant 3 : emma.moreau@eseo.fr / Apprenant2026!"
+ok "Apprenant 3 : emma.moreau@eseo.fr"
+
+R=$(curl -s -X POST "$BASE/auth/register" -H "Content-Type: application/json" \
+  -d '{"nom":"Dubois","prenom":"Julie","email":"julie.dubois@eseo.fr","motDePasse":"Apprenant2026!","roleNom":"APPRENANT"}')
+ok "Apprenant 4 : julie.dubois@eseo.fr"
+
+R=$(curl -s -X POST "$BASE/auth/register" -H "Content-Type: application/json" \
+  -d '{"nom":"Boub","prenom":"Jenny","email":"jenny.boub@eseo.fr","motDePasse":"Apprenant2026!","roleNom":"APPRENANT"}')
+ok "Apprenant 5 : jenny.boub@eseo.fr"
+
+R=$(curl -s -X POST "$BASE/auth/register" -H "Content-Type: application/json" \
+  -d '{"nom":"Morgan","prenom":"Dave","email":"dave.morgan@eseo.fr","motDePasse":"Apprenant2026!","roleNom":"APPRENANT"}')
+ok "Apprenant 6 : dave.morgan@eseo.fr"
+
+R=$(curl -s -X POST "$BASE/auth/register" -H "Content-Type: application/json" \
+  -d '{"nom":"Moreau","prenom":"Bob","email":"bob.moreau@eseo.fr","motDePasse":"Apprenant2026!","roleNom":"APPRENANT"}')
+ok "Apprenant 7 : bob.moreau@eseo.fr"
+
+R=$(curl -s -X POST "$BASE/auth/register" -H "Content-Type: application/json" \
+  -d '{"nom":"Dubois","prenom":"Tom","email":"tom.dubois@eseo.fr","motDePasse":"Apprenant2026!","roleNom":"APPRENANT"}')
+ok "Apprenant 8 : tom.dubois@eseo.fr"
+
+R=$(curl -s -X POST "$BASE/auth/register" -H "Content-Type: application/json" \
+  -d '{"nom":"Boub","prenom":"Jery","email":"jery.boub@eseo.fr","motDePasse":"Apprenant2026!","roleNom":"APPRENANT"}')
+ok "Apprenant 9 : jery.boub@eseo.fr"
+
+R=$(curl -s -X POST "$BASE/auth/register" -H "Content-Type: application/json" \
+  -d '{"nom":"Morgan","prenom":"Paul","email":"paul.morgan@eseo.fr","motDePasse":"Apprenant2026!","roleNom":"APPRENANT"}')
+ok "Apprenant 10 : paul.morgan@eseo.fr"
+
 
 # =============================================================
 # 3. RÉCUPÉRER LE TOKEN ADMIN
@@ -151,28 +190,53 @@ USERS=$(curl -s "$BASE/apprenants" -H "$AUTH")
 APP1=$(echo "$USERS" | python3 -c "import sys,json; u=json.load(sys.stdin); print(next(x['codeUtilisateur'] for x in u if x['email']=='alice.dubois@eseo.fr'))" 2>/dev/null)
 APP2=$(echo "$USERS" | python3 -c "import sys,json; u=json.load(sys.stdin); print(next(x['codeUtilisateur'] for x in u if x['email']=='lucas.bernard@eseo.fr'))" 2>/dev/null)
 APP3=$(echo "$USERS" | python3 -c "import sys,json; u=json.load(sys.stdin); print(next(x['codeUtilisateur'] for x in u if x['email']=='emma.moreau@eseo.fr'))" 2>/dev/null)
-ok "Apprenants : Alice(id=$APP1), Lucas(id=$APP2), Emma(id=$APP3)"
+APP4=$(echo "$USERS" | python3 -c "import sys,json; u=json.load(sys.stdin); print(next(x['codeUtilisateur'] for x in u if x['email']=='julie.dubois@eseo.fr'))" 2>/dev/null)
+APP5=$(echo "$USERS" | python3 -c "import sys,json; u=json.load(sys.stdin); print(next(x['codeUtilisateur'] for x in u if x['email']=='jenny.boub@eseo.fr'))" 2>/dev/null)
+APP6=$(echo "$USERS" | python3 -c "import sys,json; u=json.load(sys.stdin); print(next(x['codeUtilisateur'] for x in u if x['email']=='dave.morgan@eseo.fr'))" 2>/dev/null)
+APP7=$(echo "$USERS" | python3 -c "import sys,json; u=json.load(sys.stdin); print(next(x['codeUtilisateur'] for x in u if x['email']=='bob.moreau@eseo.fr'))" 2>/dev/null)
+APP8=$(echo "$USERS" | python3 -c "import sys,json; u=json.load(sys.stdin); print(next(x['codeUtilisateur'] for x in u if x['email']=='tom.dubois@eseo.fr'))" 2>/dev/null)
+APP9=$(echo "$USERS" | python3 -c "import sys,json; u=json.load(sys.stdin); print(next(x['codeUtilisateur'] for x in u if x['email']=='jery.boub@eseo.fr'))" 2>/dev/null)
+APP10=$(echo "$USERS" | python3 -c "import sys,json; u=json.load(sys.stdin); print(next(x['codeUtilisateur'] for x in u if x['email']=='paul.morgan@eseo.fr'))" 2>/dev/null)
+ok "Apprenants récupérés"
 
 ENS=$(curl -s "$BASE/enseignants" -H "$AUTH")
 ENS1=$(echo "$ENS" | python3 -c "import sys,json; u=json.load(sys.stdin); print(next(x['codeUtilisateur'] for x in u if x['email']=='jean.dupont@eseo.fr'))" 2>/dev/null)
 ENS2=$(echo "$ENS" | python3 -c "import sys,json; u=json.load(sys.stdin); print(next(x['codeUtilisateur'] for x in u if x['email']=='sophie.martin@eseo.fr'))" 2>/dev/null)
-ok "Enseignants : Jean Dupont(id=$ENS1), Sophie Martin(id=$ENS2)"
+ENS3=$(echo "$ENS" | python3 -c "import sys,json; u=json.load(sys.stdin); print(next(x['codeUtilisateur'] for x in u if x['email']=='bernard.margon@eseo.fr'))" 2>/dev/null)
+ENS4=$(echo "$ENS" | python3 -c "import sys,json; u=json.load(sys.stdin); print(next(x['codeUtilisateur'] for x in u if x['email']=='philimon.thomas@eseo.fr'))" 2>/dev/null)
+ENS5=$(echo "$ENS" | python3 -c "import sys,json; u=json.load(sys.stdin); print(next(x['codeUtilisateur'] for x in u if x['email']=='claude.donald@eseo.fr'))" 2>/dev/null)
+ok "Enseignants récupérés"
 
 # =============================================================
 # 8. AFFECTER APPRENANTS AUX FILIÈRES ET PROMOTIONS
 # =============================================================
 section "Affectation filières et promotions"
+
+# Promo 1 (Informatique)
 curl -s -X PUT "$BASE/apprenants/$APP1/filiere/$FIL1" -H "$AUTH" > /dev/null
 curl -s -X PUT "$BASE/apprenants/$APP1/promotion/$PROMO1" -H "$AUTH" > /dev/null
-ok "Alice → Informatique / Promo 2024-2026"
-
 curl -s -X PUT "$BASE/apprenants/$APP2/filiere/$FIL1" -H "$AUTH" > /dev/null
 curl -s -X PUT "$BASE/apprenants/$APP2/promotion/$PROMO1" -H "$AUTH" > /dev/null
-ok "Lucas → Informatique / Promo 2024-2026"
+curl -s -X PUT "$BASE/apprenants/$APP4/filiere/$FIL1" -H "$AUTH" > /dev/null
+curl -s -X PUT "$BASE/apprenants/$APP4/promotion/$PROMO1" -H "$AUTH" > /dev/null
+curl -s -X PUT "$BASE/apprenants/$APP5/filiere/$FIL1" -H "$AUTH" > /dev/null
+curl -s -X PUT "$BASE/apprenants/$APP5/promotion/$PROMO1" -H "$AUTH" > /dev/null
+curl -s -X PUT "$BASE/apprenants/$APP6/filiere/$FIL1" -H "$AUTH" > /dev/null
+curl -s -X PUT "$BASE/apprenants/$APP6/promotion/$PROMO1" -H "$AUTH" > /dev/null
+ok "Apprenants 1, 2, 4, 5, 6 → Informatique / Promo 2024-2026"
 
+# Promo 2 (Réseaux et Télécoms)
 curl -s -X PUT "$BASE/apprenants/$APP3/filiere/$FIL2" -H "$AUTH" > /dev/null
 curl -s -X PUT "$BASE/apprenants/$APP3/promotion/$PROMO2" -H "$AUTH" > /dev/null
-ok "Emma → Réseaux / Promo 2023-2025"
+curl -s -X PUT "$BASE/apprenants/$APP7/filiere/$FIL2" -H "$AUTH" > /dev/null
+curl -s -X PUT "$BASE/apprenants/$APP7/promotion/$PROMO2" -H "$AUTH" > /dev/null
+curl -s -X PUT "$BASE/apprenants/$APP8/filiere/$FIL2" -H "$AUTH" > /dev/null
+curl -s -X PUT "$BASE/apprenants/$APP8/promotion/$PROMO2" -H "$AUTH" > /dev/null
+curl -s -X PUT "$BASE/apprenants/$APP9/filiere/$FIL2" -H "$AUTH" > /dev/null
+curl -s -X PUT "$BASE/apprenants/$APP9/promotion/$PROMO2" -H "$AUTH" > /dev/null
+curl -s -X PUT "$BASE/apprenants/$APP10/filiere/$FIL2" -H "$AUTH" > /dev/null
+curl -s -X PUT "$BASE/apprenants/$APP10/promotion/$PROMO2" -H "$AUTH" > /dev/null
+ok "Apprenants 3, 7, 8, 9, 10 → Réseaux / Promo 2023-2025"
 
 # =============================================================
 # 9. CRÉER LES STAGES
@@ -226,20 +290,20 @@ ok "Soutenance : Emma, 10/07/2026 10h, Salle A101 (id=$SOUT1)"
 # =============================================================
 echo -e "\n${YELLOW}"
 echo "  ╔══════════════════════════════════════════════════╗"
-echo "  ║           Données de démo créées avec succès      ║"
+echo "  ║            Données de démo créées avec succès    ║"
 echo "  ╚══════════════════════════════════════════════════╝"
 echo -e "${RESET}"
 echo -e "  ${GREEN}Comptes de connexion :${RESET}"
 echo "  Admin      : admin@eseo.fr          / Admin2026!"
-echo "  Enseignant : jean.dupont@eseo.fr    / Enseignant2026!"
-echo "  Enseignant : sophie.martin@eseo.fr  / Enseignant2026!"
-echo "  Apprenant  : alice.dubois@eseo.fr   / Apprenant2026!"
-echo "  Apprenant  : lucas.bernard@eseo.fr  / Apprenant2026!"
-echo "  Apprenant  : emma.moreau@eseo.fr    / Apprenant2026!"
+echo "  Enseignants: @eseo.fr (Mot de passe: Enseignant2026!)"
+echo "               -> jean.dupont, sophie.martin, bernard.margon, philimon.thomas, claude.donald"
+echo "  Apprenants : @eseo.fr (Mot de passe: Apprenant2026!)"
+echo "               -> alice.dubois, lucas.bernard, emma.moreau, julie.dubois, jenny.boub,"
+echo "                  dave.morgan, bob.moreau, tom.dubois, jery.boub, paul.morgan"
 echo ""
 echo -e "  ${GREEN}Données créées :${RESET}"
 echo "  2 filières, 2 promotions, 3 entreprises"
-echo "  3 apprenants affectés, 2 enseignants"
+echo "  10 apprenants affectés, 5 enseignants créés"
 echo "  3 stages (2 EN_COURS, 1 TERMINE)"
 echo "  1 jury avec 2 membres"
 echo "  1 soutenance planifiée"
