@@ -25,6 +25,8 @@ import com.gestion_academique.backend.repository.SoutenanceRepository;
 import com.gestion_academique.backend.repository.StageRepository;
 import com.gestion_academique.backend.repository.UtilisateurRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,6 +41,8 @@ import java.util.HashSet;
 @Profile("demo")
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
+
+    private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
 
     private final UtilisateurRepository utilisateurRepository;
     private final EnseignantRepository enseignantRepository;
@@ -58,11 +62,11 @@ public class DataInitializer implements CommandLineRunner {
     @Transactional
     public void run(String... args) {
         if (utilisateurRepository.count() > 0) {
-            System.out.println("BD deja initialisee, skip.");
+            log.info("Base de donnees deja initialisee : seeding ignore");
             return;
         }
 
-        System.out.println("Initialisation des donnees de demo...");
+        log.info("Initialisation des donnees de demonstration...");
 
         // Roles
         Role roleAdmin = createRole("ADMIN");
@@ -209,13 +213,11 @@ public class DataInitializer implements CommandLineRunner {
         SuiviAcademique suivi4 = createSuivi(app3, 16.5f, "Tres bon semestre", "S1");
         SuiviAcademique suivi5 = createSuivi(app4, 17.0f, "Excellent", "S1");
 
-        System.out.println("Donnees de demo chargees.");
-        System.out.println("Comptes disponibles :");
-        System.out.println("  admin@sygle.fr / admin123!");
-        System.out.println("  jean.dupont@sygle.fr / enseignant123!");
-        System.out.println("  sophie.martin@sygle.fr / enseignant123!");
-        System.out.println("  alice.leclerc@sygle.fr / apprenant123!");
-        System.out.println("  thomas.moreau@sygle.fr / apprenant123!");
+        log.info("Donnees de demonstration chargees avec succes");
+        log.info("Comptes disponibles (voir README ou la doc interne pour les mots de passe)");
+        log.debug("  admin@sygle.fr");
+        log.debug("  jean.dupont@sygle.fr / sophie.martin@sygle.fr");
+        log.debug("  alice.leclerc@sygle.fr / thomas.moreau@sygle.fr");
     }
 
     // --- Methodes utilitaires ---
