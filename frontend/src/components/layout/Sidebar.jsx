@@ -7,6 +7,7 @@ const adminLinks = [
   { to: '/admin/enseignants', label: 'Enseignants' },
   { to: '/admin/stages', label: 'Stages' },
   { to: '/admin/rapports', label: 'Rapports' },
+  { to: '/admin/jurys', label: 'Jurys' },
   { to: '/admin/soutenances', label: 'Soutenances' },
   { to: '/admin/entreprises', label: 'Entreprises' },
 ];
